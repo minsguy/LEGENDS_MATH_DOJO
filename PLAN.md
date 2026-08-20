@@ -86,7 +86,7 @@ V1 may expose a parent-only fact-family selector if testing shows that practicin
 - A fifth-streak question should feel special: visually charge Legend's move before the answer.
 - The fifth-streak charge occurs before the question appears and before its timer starts. If the player misses or times out, the charge fizzles comically and the sibling counterattacks normally. Whether this advance warning adds too much pressure is explicitly tunable after watching the player play.
 - Wrong feedback should remain neutral and encouraging; avoid shame language or a harsh game-over state.
-- Include a sound toggle and respect reduced-motion preferences.
+- Include a sound toggle. Under reduced-motion preferences, replace spins and large knockbacks with a simpler lunge, recoil, and impact flash so the core attack remains legible on phones.
 - V1 needs only two Legend attack animations and two sibling counterattack animations; more variety is a later enhancement.
 
 ## Saved progress
@@ -150,7 +150,7 @@ Public deployment of the processed child cutouts and sibling relationships was a
 - A missed fact returns after 2–4 intervening questions and remains prioritized next session until recalled correctly under time.
 - Refreshing during a live timed question resets the streak and queues that fact for review rather than skipping it.
 - Refreshing or reopening preserves belts, stripes, learning history, and unresolved review facts.
-- The app remains usable with sound off and reduced motion enabled; reduced-motion mode still provides a clear non-motion streak celebration.
+- The app remains usable with sound off and reduced motion enabled; reduced-motion mode still provides a clear lower-motion attack and streak celebration.
 - Raw photos are absent from git history and the deployed site, including as base64 or other embedded data inside HTML, CSS, or JavaScript.
 
 ## Deferred beyond v1

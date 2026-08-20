@@ -670,6 +670,10 @@
     @keyframes opponent-attack-a { 0% { transform: translateX(0) rotate(8deg) scale(.8); } 18% { transform: translateX(-6vw) rotate(5deg) scale(.95); } 48% { transform: translateX(-47vw) rotate(-2deg) scale(1.24); } 63% { transform: translateX(-43vw) rotate(5deg) scale(1.13); } 100% { transform: translateX(0) rotate(0) scale(1); } }
     @keyframes opponent-attack-b { 0% { transform: translateX(0) rotate(35deg) scale(.72); } 32% { transform: translateX(-31vw) translateY(-38px) rotate(-155deg) scale(1.08); } 52% { transform: translateX(-48vw) translateY(0) rotate(-365deg) scale(1.25); } 68% { transform: translateX(-43vw) rotate(-350deg) scale(1.1); } 100% { transform: translateX(0) rotate(-360deg) scale(1); } }
     @keyframes legend-hit { 0%, 35% { transform: none; filter: brightness(1); } 50% { transform: translateX(-34vw) rotate(-18deg) scale(.88); filter: brightness(1.8); } 70% { transform: translateX(-24vw) rotate(9deg); } 100% { transform: none; } }
+    @keyframes legend-attack-reduced { 0% { transform: translateX(0) scale(.88); } 22% { transform: translateX(7vw) scale(.98); } 48% { transform: translateX(36vw) scale(1.15); } 64% { transform: translateX(31vw) scale(1.08); } 100% { transform: translateX(0) scale(1); } }
+    @keyframes opponent-attack-reduced { 0% { transform: translateX(0) scale(.88); } 22% { transform: translateX(-7vw) scale(.98); } 48% { transform: translateX(-36vw) scale(1.15); } 64% { transform: translateX(-31vw) scale(1.08); } 100% { transform: translateX(0) scale(1); } }
+    @keyframes opponent-hit-reduced { 0%, 35% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(15vw) scale(.9); filter: brightness(1.8); } 70% { transform: translateX(10vw) scale(.94); } 100% { transform: none; filter: brightness(1); } }
+    @keyframes legend-hit-reduced { 0%, 35% { transform: translateX(0) scale(1); filter: brightness(1); } 50% { transform: translateX(-15vw) scale(.9); filter: brightness(1.8); } 70% { transform: translateX(-10vw) scale(.94); } 100% { transform: none; filter: brightness(1); } }
     @keyframes impact-pop { 0% { transform: translate(-50%,-50%) scale(0) rotate(-18deg); opacity: 0; } 30% { transform: translate(-50%,-50%) scale(1.2) rotate(4deg); opacity: 1; } 75% { transform: translate(-50%,-50%) scale(.95) rotate(-2deg); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
     @keyframes input-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     @keyframes charge-card { 0%,100% { box-shadow: 0 7px 0 #172033; } 50% { box-shadow: 0 7px 0 #172033, 0 0 35px 12px rgba(255,202,58,.9); transform: scale(1.02); } }
@@ -701,7 +705,13 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+      *, *::before, *::after { animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      .question-card.charge, .answer-display.wrong, .reward-card, .reward-stars { animation-duration: .01ms !important; }
+      .legend.attack-a, .legend.attack-b { animation-name: legend-attack-reduced !important; animation-duration: 1s !important; }
+      .opponent.attack-a, .opponent.attack-b { animation-name: opponent-attack-reduced !important; animation-duration: 1s !important; }
+      .opponent.hit { animation-name: opponent-hit-reduced !important; animation-duration: 1s !important; }
+      .legend.hit { animation-name: legend-hit-reduced !important; animation-duration: 1s !important; }
+      .impact.show { animation-duration: .9s !important; }
     }
   </style>
 </head>
