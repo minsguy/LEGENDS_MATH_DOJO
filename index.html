@@ -29,6 +29,8 @@
     button, input, select { font: inherit; }
     button { touch-action: manipulation; }
     [hidden] { display: none !important; }
+    html.portrait-blocked,
+    html.portrait-blocked body { height: 100%; overflow: hidden; }
 
     .app {
       min-height: 100dvh;
@@ -46,6 +48,51 @@
       opacity: .09;
       pointer-events: none;
       background-image: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 7px);
+    }
+
+    .rotate-overlay {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: max(30px, env(safe-area-inset-top)) 28px max(30px, env(safe-area-inset-bottom));
+      color: white;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255,255,255,.18), transparent 32%),
+        linear-gradient(155deg, #451952, #79245f 52%, #24163f);
+      text-align: center;
+    }
+
+    .rotate-phone {
+      font-size: clamp(4rem, 14vmin, 7rem);
+      line-height: 1;
+      filter: drop-shadow(0 10px 0 rgba(32,22,47,.5));
+      animation: rotate-phone-cue 1.8s ease-in-out infinite;
+    }
+
+    .rotate-overlay h2 {
+      margin: 0;
+      font-size: clamp(2rem, 7vmin, 4.5rem);
+      line-height: .95;
+      text-transform: uppercase;
+      text-shadow: 5px 5px 0 #9d2b96;
+    }
+
+    .rotate-overlay p {
+      max-width: 560px;
+      margin: 0;
+      color: #ffe6f5;
+      font-size: clamp(1rem, 3vmin, 1.45rem);
+      font-weight: 900;
+    }
+
+    @keyframes rotate-phone-cue {
+      0%, 20%, 100% { transform: rotate(90deg); }
+      55%, 80% { transform: rotate(0); }
     }
 
     .screen {
@@ -983,6 +1030,7 @@
       .impact.show { animation-duration: .9s !important; }
       .intro-legend.talking .intro-phone-sprite, .intro-legend.reaction { animation: none !important; }
       .speech-bubble .math-punchline { animation: none !important; }
+      .rotate-phone { animation: none !important; transform: rotate(0); }
       .intro-legend.kick-one, .intro-legend.kick-two { animation-name: intro-kick-one !important; animation-duration: 1s !important; }
       .intro-finale.show { animation-duration: .6s !important; }
     }
@@ -1094,6 +1142,12 @@
       </section>
     </section>
 
+    <section id="rotateOverlay" class="rotate-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="rotateTitle">
+      <div class="rotate-phone" aria-hidden="true">📱</div>
+      <h2 id="rotateTitle">Flip your screen upright, Legend!</h2>
+      <p>Your belt, stripes, streak, and question are safe. The clock will wait.</p>
+    </section>
+
     <div id="toast" class="toast" role="status" aria-live="assertive"></div>
 
     <div id="rewardBackdrop" class="reward-backdrop" hidden>
@@ -1168,6 +1222,8 @@
       let introAdvanceTimeout = 0;
       let introLineIndex = -1;
       let introAcceptingInput = false;
+      let portraitBlocked = false;
+      let experienceInitialized = false;
 
       function loadState() {
         try {
@@ -1353,11 +1409,63 @@
       }
 
       function initializeExperience() {
+        if (experienceInitialized) return;
+        experienceInitialized = true;
         updateHomeProgress();
         els.gameSound.textContent = state.settings.sound ? '🔊' : '🔇';
         const forceIntro = new URLSearchParams(location.search).get('intro') === '1';
         if (!state.introSeen || forceIntro) playIntro();
         else els.startScreen.hidden = false;
+      }
+
+      function shouldRequirePortrait() {
+        const touchDevice = navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+        const phoneOrTablet = Math.max(screen.width, screen.height) <= 1400;
+        return touchDevice && phoneOrTablet && innerWidth > innerHeight;
+      }
+
+      function pauseForLandscape() {
+        if (session?.mode === 'timed') {
+          const now = performance.now();
+          cancelAnimationFrame(timerFrame);
+          session.orientationRemaining = Math.max(0, session.deadline - now);
+          session.orientationPausedAt = now;
+          session.mode = 'orientation-paused';
+        }
+        if (!els.introScreen.hidden) {
+          cancelIntroTimeline();
+          els.introScreen.dataset.restartAfterRotate = 'true';
+        }
+      }
+
+      function resumeAfterLandscape() {
+        if (session?.mode === 'orientation-paused') {
+          const now = performance.now();
+          const pausedFor = now - session.orientationPausedAt;
+          const remaining = session.orientationRemaining;
+          session.startedAt += pausedFor;
+          session.deadline = now + remaining;
+          delete session.orientationPausedAt;
+          delete session.orientationRemaining;
+          session.mode = 'timed';
+          els.answerDisplay.focus({ preventScroll: true });
+          tickTimer(now);
+        }
+        if (els.introScreen.dataset.restartAfterRotate) {
+          delete els.introScreen.dataset.restartAfterRotate;
+          playIntro();
+        }
+      }
+
+      function updateOrientationGate() {
+        portraitBlocked = shouldRequirePortrait();
+        els.rotateOverlay.hidden = !portraitBlocked;
+        document.documentElement.classList.toggle('portrait-blocked', portraitBlocked);
+        if (portraitBlocked) pauseForLandscape();
+        else {
+          resumeAfterLandscape();
+          initializeExperience();
+        }
       }
 
       function startSession(opponent) {
@@ -1479,6 +1587,12 @@
         session.mode = 'timed';
         session.startedAt = performance.now();
         session.deadline = session.startedAt + TIMER_SECONDS * 1000;
+        if (portraitBlocked) {
+          session.orientationRemaining = TIMER_SECONDS * 1000;
+          session.orientationPausedAt = session.startedAt;
+          session.mode = 'orientation-paused';
+          return;
+        }
         els.answerDisplay.focus({ preventScroll: true });
         tickTimer();
       }
@@ -1495,14 +1609,14 @@
       }
 
       function appendDigit(digit) {
-        if (!session || !['timed', 'correction'].includes(session.mode)) return;
+        if (portraitBlocked || !session || !['timed', 'correction'].includes(session.mode)) return;
         if (session.answer.length >= 2) return;
         session.answer += digit;
         renderAnswer();
       }
 
       function backspace() {
-        if (!session || !['timed', 'correction'].includes(session.mode)) return;
+        if (portraitBlocked || !session || !['timed', 'correction'].includes(session.mode)) return;
         session.answer = session.answer.slice(0, -1);
         renderAnswer();
       }
@@ -1510,7 +1624,7 @@
       function renderAnswer() { els.answerDisplay.value = session?.answer || ''; }
 
       function submitAnswer() {
-        if (!session || !['timed', 'correction'].includes(session.mode) || session.answer === '') return;
+        if (portraitBlocked || !session || !['timed', 'correction'].includes(session.mode) || session.answer === '') return;
         const expected = session.current.a * session.current.b;
         const submitted = Number(session.answer);
         if (session.mode === 'correction') {
@@ -1782,8 +1896,10 @@
         if (session?.mode === 'timed' && session.current) state.pendingQuestion = { a: session.current.a, b: session.current.b };
         saveState();
       });
+      window.addEventListener('resize', updateOrientationGate);
+      window.addEventListener('orientationchange', () => setTimeout(updateOrientationGate, 120));
 
-      initializeExperience();
+      updateOrientationGate();
     })();
   </script>
 </body>

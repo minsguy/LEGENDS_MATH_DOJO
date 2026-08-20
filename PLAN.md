@@ -153,6 +153,7 @@ Public deployment of the processed child cutouts and sibling relationships was a
 - Refreshing during a live timed question resets the streak and queues that fact for review rather than skipping it.
 - Refreshing or reopening preserves belts, stripes, learning history, and unresolved review facts.
 - The app remains usable with sound off and reduced motion enabled; reduced-motion mode still provides a clear lower-motion attack and streak celebration.
+- Phones and tablets in landscape show a portrait-orientation prompt. An active timed question pauses without changing its fact, answer, streak, belt, or stripes and resumes with the same remaining time.
 - Raw photos are absent from git history and the deployed site, including as base64 or other embedded data inside HTML, CSS, or JavaScript.
 
 ## Deferred beyond v1
