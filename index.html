@@ -1163,7 +1163,7 @@
 
       <section class="question-zone">
         <div id="questionCard" class="question-card">
-          <div class="streak-label">Combo <span id="streakCount">0</span>/5</div>
+          <div class="streak-label"><span id="streakLabelText">Combo</span>: <span id="streakCount">0</span>/5</div>
           <div id="streakPips" class="streak-pips" aria-label="Correct-answer streak"></div>
           <div id="challengeProgress" class="challenge-progress" hidden>Final Challenge · 0/100 mastered</div>
           <div id="prompt" class="prompt">Ready!</div>
@@ -1382,6 +1382,7 @@
       }
 
       function renderStreak() {
+        els.streakLabelText.textContent = session?.challenge ? 'Next Attack' : 'Combo';
         els.streakCount.textContent = session ? session.streak : 0;
         els.streakPips.innerHTML = '';
         for (let i = 0; i < 5; i++) {
