@@ -190,6 +190,7 @@
       color: #9d2b96;
       font-size: 1.18em;
       text-transform: uppercase;
+      animation: intro-punchline-reveal .45s cubic-bezier(.2,1.3,.3,1) both;
     }
 
     .practice-board {
@@ -296,6 +297,7 @@
     @keyframes intro-phone-reaction { 0%,100% { transform: translateX(-50%) rotate(0) scale(1); } 45% { transform: translateX(-50%) rotate(-2.5deg) scale(1.025); } }
     @keyframes intro-phone-hangup { 0% { opacity: 1; transform: rotate(0) translateY(0); } 55% { opacity: 1; transform: rotate(4deg) translateY(12px); } 100% { opacity: 0; transform: rotate(7deg) translateY(55px); } }
     @keyframes intro-click-pop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.55) rotate(-8deg); } 30%,70% { opacity: 1; transform: translate(-50%,-50%) scale(1.08) rotate(2deg); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.2); } }
+    @keyframes intro-punchline-reveal { 0% { opacity: 0; transform: translateY(-8px) scale(.82); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes intro-kick-one { 0% { transform: translateX(-50%) scale(.82) rotate(-8deg); } 25% { transform: translateX(-45%) scale(.95) rotate(-3deg); } 52% { transform: translateX(-22%) scale(1.15) rotate(3deg); } 70% { transform: translateX(-27%) scale(1.08); } 100% { transform: translateX(-50%) scale(1); } }
     @keyframes intro-kick-two { 0% { transform: translateX(-50%) scale(.78) rotate(-24deg); } 34% { transform: translateX(-40%) translateY(-35px) scale(1.02) rotate(155deg); } 58% { transform: translateX(-19%) scale(1.18) rotate(360deg); } 100% { transform: translateX(-50%) scale(1) rotate(360deg); } }
     @keyframes intro-kick-mobile-one { 0% { transform: translateX(-66%) scale(.78) rotate(-6deg); } 28% { transform: translateX(-60%) scale(.9) rotate(-2deg); } 52% { transform: translateX(-48%) scale(1.02) rotate(2deg); } 72% { transform: translateX(-52%) scale(.96); } 100% { transform: translateX(-60%) scale(.88); } }
@@ -980,6 +982,7 @@
       .legend.hit { animation-name: legend-hit-reduced !important; animation-duration: 1s !important; }
       .impact.show { animation-duration: .9s !important; }
       .intro-legend.talking .intro-phone-sprite, .intro-legend.reaction { animation: none !important; }
+      .speech-bubble .math-punchline { animation: none !important; }
       .intro-legend.kick-one, .intro-legend.kick-two { animation-name: intro-kick-one !important; animation-duration: 1s !important; }
       .intro-finale.show { animation-duration: .6s !important; }
     }
@@ -1139,7 +1142,7 @@
       const INTRO_LINES = [
         { html: 'Ugh. My dad is the <strong>WORST.</strong>', autoMs: 7000 },
         { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…', autoMs: 9000 },
-        { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…<span class="math-punchline">…with MATH.</span>', autoMs: 7000, punchline: true },
+        { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…<span class="math-punchline">…with MATH.</span>', autoMs: 7000, punchline: true, append: true },
         { html: 'See ya!', autoMs: 5000 }
       ];
       const els = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(el => [el.id, el]));
@@ -1260,11 +1263,11 @@
         element.classList.add(className);
       }
 
-      function setIntroSpeech(line) {
+      function setIntroSpeech(line, keepBubbleVisible = false) {
         els.introSpeechText.innerHTML = line.html;
-        els.introSpeech.className = `speech-bubble${line.punchline ? ' punchline' : ''}`;
+        els.introSpeech.className = `speech-bubble${line.punchline ? ' punchline' : ''}${keepBubbleVisible ? ' show' : ''}`;
         restartIntroClass(els.introLegend, 'reaction');
-        requestAnimationFrame(() => els.introSpeech.classList.add('show'));
+        if (!keepBubbleVisible) requestAnimationFrame(() => els.introSpeech.classList.add('show'));
         introAcceptingInput = true;
         introAdvanceTimeout = setTimeout(advanceIntroDialogue, line.autoMs);
       }
@@ -1274,8 +1277,14 @@
         introAcceptingInput = false;
         clearTimeout(introAdvanceTimeout);
         introAdvanceTimeout = 0;
-        els.introSpeech.classList.remove('show');
         const nextLine = introLineIndex + 1;
+        const nextSpeech = INTRO_LINES[nextLine];
+        if (nextSpeech?.append) {
+          introLineIndex = nextLine;
+          setIntroSpeech(nextSpeech, true);
+          return;
+        }
+        els.introSpeech.classList.remove('show');
         queueIntro(420, () => {
           introLineIndex = nextLine;
           if (introLineIndex < INTRO_LINES.length) setIntroSpeech(INTRO_LINES[introLineIndex]);
