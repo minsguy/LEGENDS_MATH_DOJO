@@ -4,6 +4,8 @@
 
 Initial v1 implementation is complete and browser-tested. The single-page game includes idle and action photo cutouts, fixed fifteen-second recall, streak attacks, untimed no-reveal correction, delayed retries, realistic belt/stripe progression, reward ceremonies, sound, and local persistence. The player is labeled Legend throughout the public project. Public GitHub Pages testing with the processed cutouts was approved on August 19, 2026; raw family photos remain local and excluded from git.
 
+An optional first-visit opening sequence is being prototyped separately on `codex/opening-sequence`. It is intentionally excluded from the live `main` deployment pending review.
+
 ## Goal
 
 Help the player memorize multiplication facts through 9 × 9 using short timed recall, required error correction, adaptive repetition, and a funny sibling karate theme.

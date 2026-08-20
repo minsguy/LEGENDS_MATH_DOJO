@@ -54,6 +54,290 @@
       z-index: 1;
     }
 
+    .intro-screen {
+      min-height: 100dvh;
+      overflow: hidden;
+      color: white;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255,255,255,.2), transparent 30%),
+        linear-gradient(155deg, #451952 0%, #79245f 48%, #24163f 100%);
+    }
+
+    .intro-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .2;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 19.7%, rgba(255,255,255,.22) 20%),
+        linear-gradient(transparent 70%, rgba(0,0,0,.45) 70% 72%, #6b3f28 72%);
+    }
+
+    .intro-skip {
+      position: absolute;
+      z-index: 20;
+      top: max(14px, env(safe-area-inset-top));
+      right: 14px;
+      padding: 8px 13px;
+      border: 2px solid rgba(255,255,255,.75);
+      border-radius: 999px;
+      color: white;
+      background: rgba(23,32,51,.72);
+      font-size: .85rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .intro-stage {
+      width: min(760px, 100%);
+      height: 100dvh;
+      min-height: 560px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .intro-label {
+      position: absolute;
+      z-index: 2;
+      top: max(22px, env(safe-area-inset-top));
+      left: 50%;
+      margin: 0;
+      transform: translateX(-50%);
+      color: #ffc8ec;
+      font-size: .8rem;
+      font-weight: 1000;
+      letter-spacing: .19em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .intro-legend {
+      position: absolute;
+      z-index: 5;
+      left: 50%;
+      bottom: 2%;
+      width: min(67vw, 430px);
+      height: 79%;
+      transform: translateX(-50%);
+      transform-origin: center bottom;
+    }
+
+    .intro-legend img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 18px 12px rgba(0,0,0,.42));
+    }
+
+    .intro-legend .intro-action { display: none; }
+    .intro-legend.warming-up .intro-idle { display: none; }
+    .intro-legend.warming-up .intro-action { display: block; }
+
+    .intro-phone-string {
+      position: absolute;
+      z-index: 3;
+      inset: 23% 7% auto;
+      width: 86%;
+      height: 35%;
+      overflow: visible;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .intro-phone-string path {
+      fill: none;
+      stroke: #ffd6ec;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-dasharray: 8 9;
+      filter: drop-shadow(0 3px 1px rgba(0,0,0,.4));
+    }
+
+    .intro-can {
+      position: absolute;
+      z-index: 9;
+      width: 62px;
+      height: 82px;
+      border: 4px solid #20162f;
+      border-radius: 9px 9px 17px 17px;
+      box-shadow: inset 0 5px 0 rgba(255,255,255,.35), inset 0 -8px 0 rgba(0,0,0,.18), 0 8px 12px rgba(0,0,0,.35);
+      opacity: 0;
+    }
+
+    .intro-can::before {
+      content: "";
+      position: absolute;
+      inset: -8px -7px auto;
+      height: 15px;
+      border: 4px solid #20162f;
+      border-radius: 50%;
+      background: #2b183d;
+      box-shadow: inset 0 3px 0 rgba(255,255,255,.25);
+    }
+
+    .intro-can::after {
+      content: "";
+      position: absolute;
+      inset: 16px 7px;
+      border-radius: 4px;
+      opacity: .32;
+      background: repeating-linear-gradient(0deg, transparent 0 7px, white 7px 10px);
+    }
+
+    .intro-can.caller {
+      top: 29%;
+      left: 5%;
+      background: linear-gradient(90deg, #f04fa5, #ff8fd0 48%, #c32988);
+      transform: rotate(18deg);
+    }
+
+    .intro-can.legend-phone {
+      top: 29%;
+      left: calc(50% + 43px);
+      background: linear-gradient(90deg, #6a29a7, #b968e1 48%, #5b1d96);
+      transform: rotate(-20deg) scale(.78);
+      transform-origin: center bottom;
+    }
+
+    .intro-phone-active .intro-phone-string,
+    .intro-phone-active .intro-can { opacity: 1; }
+    .intro-phone-active .intro-can.caller { animation: can-ring .18s ease-in-out 5 alternate; }
+    .intro-phone-active .intro-can.legend-phone { animation: answer-can .65s cubic-bezier(.2,.9,.3,1) both; }
+
+    .speech-bubble {
+      position: absolute;
+      z-index: 12;
+      top: 10%;
+      left: 5%;
+      width: min(72%, 470px);
+      min-height: 114px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 24px;
+      border: 4px solid #20162f;
+      border-radius: 28px 28px 6px 28px;
+      color: #20162f;
+      background: #fffaf5;
+      box-shadow: 0 8px 0 #20162f, 0 20px 35px rgba(0,0,0,.28);
+      font-size: clamp(1.2rem, 4.6vw, 2rem);
+      font-weight: 1000;
+      line-height: 1.08;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-18px) scale(.88);
+      transition: opacity .2s ease, transform .25s cubic-bezier(.2,1.3,.3,1);
+    }
+
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      right: 15%;
+      bottom: -27px;
+      border: 14px solid transparent;
+      border-top: 18px solid #20162f;
+      transform: rotate(-12deg);
+    }
+
+    .speech-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+    .speech-bubble .math-punchline { color: #9d2b96; font-size: 1.18em; text-transform: uppercase; }
+
+    .practice-board {
+      position: absolute;
+      z-index: 4;
+      right: 4%;
+      top: 46%;
+      width: 116px;
+      height: 26px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .practice-board::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 20px;
+      width: 9px;
+      height: 180px;
+      border: 3px solid #2f1e17;
+      background: #74452c;
+      transform: translateX(-50%);
+    }
+
+    .board-half {
+      position: absolute;
+      top: 0;
+      width: 58px;
+      height: 26px;
+      border: 3px solid #3b2418;
+      background: repeating-linear-gradient(0deg, #d99a52 0 5px, #c8823b 5px 8px);
+      transform-origin: center;
+    }
+
+    .board-half.left { left: 0; clip-path: polygon(0 0, 100% 0, 88% 48%, 100% 100%, 0 100%); }
+    .board-half.right { right: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12% 52%); }
+    .intro-warmup .practice-board { opacity: 1; }
+    .practice-board.broken .board-half.left { animation: board-left-break .8s ease-in both; }
+    .practice-board.broken .board-half.right { animation: board-right-break .8s ease-in both; }
+
+    .intro-impact {
+      position: absolute;
+      z-index: 15;
+      top: 37%;
+      left: 62%;
+      color: white;
+      font-size: clamp(2.5rem, 12vw, 5.5rem);
+      font-weight: 1000;
+      font-style: italic;
+      letter-spacing: -.07em;
+      -webkit-text-stroke: 4px #20162f;
+      paint-order: stroke fill;
+      text-shadow: 7px 7px 0 #f04fa5;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(0);
+    }
+
+    .intro-impact.pop { animation: intro-impact-pop .7s ease-out both; }
+
+    .intro-finale {
+      position: absolute;
+      z-index: 18;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: rgba(32,22,47,.74);
+      font-size: clamp(3.2rem, 16vw, 7rem);
+      font-weight: 1000;
+      font-style: italic;
+      line-height: .85;
+      letter-spacing: -.06em;
+      text-align: center;
+      text-shadow: 7px 7px 0 #9d2b96, 12px 12px 0 #20162f;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-finale.show { animation: intro-finale .95s cubic-bezier(.2,1.25,.3,1) both; }
+
+    .intro-legend.kick-one { animation: intro-kick-one 1s cubic-bezier(.2,.8,.2,1); }
+    .intro-legend.kick-two { animation: intro-kick-two 1s cubic-bezier(.2,.8,.2,1); }
+
+    @keyframes can-ring { from { transform: rotate(12deg); } to { transform: rotate(24deg) translateY(-3px); } }
+    @keyframes answer-can { 0% { opacity: 0; transform: translate(38px,65px) rotate(30deg) scale(.55); } 100% { opacity: 1; transform: rotate(-20deg) scale(.78); } }
+    @keyframes intro-kick-one { 0% { transform: translateX(-50%) scale(.82) rotate(-8deg); } 25% { transform: translateX(-45%) scale(.95) rotate(-3deg); } 52% { transform: translateX(-22%) scale(1.15) rotate(3deg); } 70% { transform: translateX(-27%) scale(1.08); } 100% { transform: translateX(-50%) scale(1); } }
+    @keyframes intro-kick-two { 0% { transform: translateX(-50%) scale(.78) rotate(-24deg); } 34% { transform: translateX(-40%) translateY(-35px) scale(1.02) rotate(155deg); } 58% { transform: translateX(-19%) scale(1.18) rotate(360deg); } 100% { transform: translateX(-50%) scale(1) rotate(360deg); } }
+    @keyframes intro-kick-mobile-one { 0% { transform: translateX(-66%) scale(.78) rotate(-6deg); } 28% { transform: translateX(-60%) scale(.9) rotate(-2deg); } 52% { transform: translateX(-48%) scale(1.02) rotate(2deg); } 72% { transform: translateX(-52%) scale(.96); } 100% { transform: translateX(-60%) scale(.88); } }
+    @keyframes intro-kick-mobile-two { 0% { transform: translateX(-64%) scale(.8) rotate(-10deg); } 35% { transform: translateX(-57%) translateY(-22px) scale(.92) rotate(14deg); } 58% { transform: translateX(-46%) scale(1.04) rotate(-4deg); } 100% { transform: translateX(-60%) scale(.88) rotate(0); } }
+    @keyframes board-left-break { to { transform: translate(-55px,95px) rotate(-80deg); opacity: 0; } }
+    @keyframes board-right-break { to { transform: translate(65px,105px) rotate(92deg); opacity: 0; } }
+    @keyframes intro-impact-pop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0) rotate(-15deg); } 35%,70% { opacity: 1; transform: translate(-50%,-50%) scale(1.12) rotate(2deg); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); } }
+    @keyframes intro-impact-pop-mobile { 0% { opacity: 0; transform: translateY(-50%) scale(0) rotate(-10deg); } 35%,70% { opacity: 1; transform: translateY(-50%) scale(1.02) rotate(1deg); } 100% { opacity: 0; transform: translateY(-50%) scale(1.2); } }
+    @keyframes intro-finale { 0% { opacity: 0; transform: scale(.6) rotate(-5deg); } 30%,75% { opacity: 1; transform: scale(1) rotate(0); } 100% { opacity: 0; transform: scale(1.15); } }
+
     .start-screen {
       display: grid;
       align-content: center;
@@ -681,6 +965,20 @@
     @keyframes reward-stars { from { opacity: .55; scale: .92; } to { opacity: 1; scale: 1.08; } }
 
     @media (max-width: 680px) {
+      .intro-stage { min-height: 620px; }
+      .intro-label { top: max(17px, env(safe-area-inset-top)); inset-inline: 0; width: auto; transform: none; padding: 0 80px 0 8px; font-size: .56rem; letter-spacing: .1em; text-align: center; white-space: normal; }
+      .speech-bubble { top: 9%; left: 4%; width: 92%; min-height: 106px; padding: 15px 18px; }
+      .intro-legend { width: min(88vw, 410px); height: 69%; bottom: 1%; }
+      .intro-phone-string { inset: 35% 3% auto; width: 94%; height: 25%; }
+      .intro-can { width: 49px; height: 65px; }
+      .intro-can.caller { top: 31%; left: 2%; }
+      .intro-can.legend-phone { top: 48%; left: calc(50% + 20px); }
+      .intro-legend.warming-up { width: min(82vw, 350px); bottom: 12%; }
+      .practice-board { right: 1%; top: 55%; transform: scale(.76); }
+      .intro-impact { top: 46%; left: 0; width: 100%; padding: 8px; text-align: center; transform: translateY(-50%) scale(0); }
+      .intro-impact.pop { animation-name: intro-impact-pop-mobile; }
+      .intro-legend.kick-one { animation-name: intro-kick-mobile-one; }
+      .intro-legend.kick-two { animation-name: intro-kick-mobile-two; }
       .opponent-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .opponent-card { min-height: 245px; }
       .opponent-card img { height: 205px; }
@@ -712,12 +1010,42 @@
       .opponent.hit { animation-name: opponent-hit-reduced !important; animation-duration: 1s !important; }
       .legend.hit { animation-name: legend-hit-reduced !important; animation-duration: 1s !important; }
       .impact.show { animation-duration: .9s !important; }
+      .intro-legend.kick-one, .intro-legend.kick-two { animation-name: intro-kick-one !important; animation-duration: 1s !important; }
+      .intro-finale.show { animation-duration: .6s !important; }
+    }
+
+    @media (max-width: 680px) and (prefers-reduced-motion: reduce) {
+      .intro-legend.kick-one { animation-name: intro-kick-mobile-one !important; }
+      .intro-legend.kick-two { animation-name: intro-kick-mobile-two !important; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <section id="startScreen" class="screen start-screen" aria-labelledby="title">
+    <section id="introScreen" class="screen intro-screen" hidden aria-label="Legend's opening scene">
+      <button id="introSkip" class="intro-skip">Skip Intro</button>
+      <div id="introStage" class="intro-stage">
+        <p class="intro-label">A totally normal afternoon...</p>
+        <svg class="intro-phone-string" viewBox="0 0 700 260" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M28 120 C 165 250, 395 250, 630 105"></path>
+        </svg>
+        <div class="intro-can caller" aria-hidden="true"></div>
+        <div class="intro-can legend-phone" aria-hidden="true"></div>
+        <div id="introSpeech" class="speech-bubble" role="status" aria-live="polite"></div>
+        <div id="introLegend" class="intro-legend">
+          <img class="intro-idle" src="assets/processed/legend.png" alt="Legend answering a tin-can phone">
+          <img class="intro-action" src="assets/processed/legend-kick.png" alt="Legend practicing a karate kick">
+        </div>
+        <div id="practiceBoard" class="practice-board" aria-hidden="true">
+          <span class="board-half left"></span>
+          <span class="board-half right"></span>
+        </div>
+        <div id="introImpact" class="intro-impact" aria-hidden="true">HI-YAH!</div>
+        <div id="introFinale" class="intro-finale" aria-hidden="true">LET'S<br>DO THIS!</div>
+      </div>
+    </section>
+
+    <section id="startScreen" class="screen start-screen" hidden aria-labelledby="title">
       <p class="eyebrow">Five facts. One mighty move.</p>
       <h1 id="title">Legend's<br>Math Dojo</h1>
       <p class="start-copy">Get five multiplication facts right in a row to unleash an attack. Miss one, and your sibling gets the counter!</p>
@@ -738,6 +1066,7 @@
       </div>
       <div class="secondary-row">
         <button id="startSound" class="secondary-button" aria-pressed="true">🔊 Sound On</button>
+        <button id="replayIntro" class="secondary-button">Replay Intro</button>
       </div>
     </section>
 
@@ -847,6 +1176,7 @@
         totalQuestions: 0,
         totalTimedCorrect: 0,
         successfulStreaks: 0,
+        introSeen: false,
         facts: {},
         reviewQueue: [],
         settings: { sound: true }
@@ -856,6 +1186,7 @@
       let session = null;
       let timerFrame = 0;
       let audioContext = null;
+      let introTimeouts = [];
 
       function loadState() {
         try {
@@ -931,6 +1262,84 @@
           pip.className = `pip${session && i < session.streak ? ' on' : ''}`;
           els.streakPips.appendChild(pip);
         }
+      }
+
+      function queueIntro(delay, callback) {
+        introTimeouts.push(setTimeout(callback, delay));
+      }
+
+      function cancelIntroTimeline() {
+        introTimeouts.forEach(clearTimeout);
+        introTimeouts = [];
+      }
+
+      function setIntroSpeech(message) {
+        els.introSpeech.innerHTML = message;
+        els.introSpeech.classList.add('show');
+      }
+
+      function restartIntroClass(element, className) {
+        element.classList.remove(className);
+        void element.offsetWidth;
+        element.classList.add(className);
+      }
+
+      function playIntro() {
+        cancelIntroTimeline();
+        els.gameScreen.hidden = true;
+        els.startScreen.hidden = true;
+        els.introScreen.hidden = false;
+        els.introStage.className = 'intro-stage';
+        els.introLegend.className = 'intro-legend';
+        els.practiceBoard.className = 'practice-board';
+        els.introSpeech.className = 'speech-bubble';
+        els.introSpeech.textContent = '';
+        els.introImpact.className = 'intro-impact';
+        els.introFinale.className = 'intro-finale';
+
+        queueIntro(250, () => els.introStage.classList.add('intro-phone-active'));
+        queueIntro(1050, () => setIntroSpeech('Ugh, my dad is the worst.'));
+        queueIntro(2850, () => setIntroSpeech('He won\'t let me do anything until I beat up my siblings… <span class="math-punchline">with MATH.</span>'));
+        queueIntro(5850, () => setIntroSpeech('See ya!'));
+        queueIntro(6650, () => {
+          els.introSpeech.classList.remove('show');
+          els.introStage.classList.remove('intro-phone-active');
+        });
+        queueIntro(7150, () => {
+          els.introStage.classList.add('intro-warmup');
+          els.introLegend.classList.add('warming-up');
+          restartIntroClass(els.introLegend, 'kick-one');
+        });
+        queueIntro(7550, () => {
+          restartIntroClass(els.introImpact, 'pop');
+          els.practiceBoard.classList.add('broken');
+          playTone('attack');
+        });
+        queueIntro(8250, () => els.introLegend.classList.remove('kick-one'));
+        queueIntro(8500, () => {
+          restartIntroClass(els.introLegend, 'kick-two');
+          restartIntroClass(els.introImpact, 'pop');
+          playTone('attack');
+        });
+        queueIntro(9550, () => els.introFinale.classList.add('show'));
+        queueIntro(10550, finishIntro);
+      }
+
+      function finishIntro() {
+        cancelIntroTimeline();
+        state.introSeen = true;
+        saveState();
+        els.introScreen.hidden = true;
+        els.startScreen.hidden = false;
+        updateHomeProgress();
+      }
+
+      function initializeExperience() {
+        updateHomeProgress();
+        els.gameSound.textContent = state.settings.sound ? '🔊' : '🔇';
+        const forceIntro = new URLSearchParams(location.search).get('intro') === '1';
+        if (!state.introSeen || forceIntro) playIntro();
+        else els.startScreen.hidden = false;
       }
 
       function startSession(opponent) {
@@ -1346,6 +1755,8 @@
       });
       els.finishButton.addEventListener('click', finishSession);
       els.rewardContinue.addEventListener('click', continueAfterReward);
+      els.introSkip.addEventListener('click', finishIntro);
+      els.replayIntro.addEventListener('click', playIntro);
       els.startSound.addEventListener('click', toggleSound);
       els.gameSound.addEventListener('click', toggleSound);
       window.addEventListener('beforeunload', () => {
@@ -1353,8 +1764,7 @@
         saveState();
       });
 
-      updateHomeProgress();
-      els.gameSound.textContent = state.settings.sound ? '🔊' : '🔇';
+      initializeExperience();
     })();
   </script>
 </body>
