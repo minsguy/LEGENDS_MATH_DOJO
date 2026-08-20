@@ -20,13 +20,13 @@ Read `PLAN.md` before changing game behavior. Keep it updated when product decis
 
 ## Learning rules that must remain true
 
-- A normal first attempt has a 12-second limit.
+- A normal first attempt has a 15-second limit.
 - Five timed correct answers in a row earn the player character, labeled Legend, an attack and a progression reward.
 - A wrong answer or timeout resets the streak and triggers the sibling's counterattack.
 - After a wrong answer or timeout, the player must keep guessing until she enters the correct answer without a time limit; do not reveal it first.
 - A correction never advances the streak.
 - Missed facts return after a short delay and are prioritized in the next play session.
-- V1 has a fixed 12-second timer and no child-accessible parent/settings panel.
+- V1 has a fixed 15-second timer and no child-accessible parent/settings panel.
 
 ## Safety and tone
 

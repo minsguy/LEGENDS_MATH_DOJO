@@ -2,7 +2,7 @@
 
 ## Status
 
-Initial v1 implementation is complete and browser-tested. The single-page game includes idle and action photo cutouts, fixed twelve-second recall, streak attacks, untimed no-reveal correction, delayed retries, realistic belt/stripe progression, reward ceremonies, sound, and local persistence. The player is labeled Legend throughout the public project. Public GitHub Pages testing with the processed cutouts was approved on August 19, 2026; raw family photos remain local and excluded from git.
+Initial v1 implementation is complete and browser-tested. The single-page game includes idle and action photo cutouts, fixed fifteen-second recall, streak attacks, untimed no-reveal correction, delayed retries, realistic belt/stripe progression, reward ceremonies, sound, and local persistence. The player is labeled Legend throughout the public project. Public GitHub Pages testing with the processed cutouts was approved on August 19, 2026; raw family photos remain local and excluded from git.
 
 ## Goal
 
@@ -17,7 +17,7 @@ Legend faces one sibling at a time in friendly, continuous cartoon-dojo play. Sh
 ### Timed attempt
 
 1. Finish any preceding feedback animation, then show a multiplication fact and enable/focus the answer input.
-2. Start the 12-second power bar only when the full question is visible and input is enabled.
+2. Start the 15-second power bar only when the full question is visible and input is enabled.
 3. Accept answers from the physical keyboard or the on-screen number pad. Digits may be freely changed with Backspace before submission.
 4. Submit only with Enter or the on-screen submit button; never infer submission from digit count.
 5. If time expires before submission, treat the attempt as a timeout even when digits are present in the input.
@@ -108,7 +108,7 @@ If the page reloads or closes while a timed question is active, reset the live s
 
 ## Controls and diagnostics
 
-- V1 uses a fixed twelve-second timer with no visible parent/settings screen, preventing the player from changing the difficulty.
+- V1 uses a fixed fifteen-second timer with no visible parent/settings screen, preventing the player from changing the difficulty.
 - The child-facing controls are limited to sound, number entry, submit, and Finish.
 - Per-fact accuracy, response time, and review data are still saved internally so they can be inspected or exposed in a later parent-only design.
 - Timer adjustment, progress reset, and focused fact-family selection are deferred until there is an adult-only access method worth adding.
@@ -141,7 +141,7 @@ Public deployment of the processed child cutouts and sibling relationships was a
 - Physical digits, Backspace, and Enter work without extra clicks.
 - On-screen keypad works comfortably on a phone-sized viewport.
 - Answers submit only through Enter or the on-screen submit control; a partial or complete unsubmitted input at expiry is a timeout.
-- A correct answer inside twelve seconds advances the streak exactly once.
+- A correct answer inside fifteen seconds advances the streak exactly once.
 - The fifth consecutive timed correct answer triggers exactly one Legend attack and one stripe.
 - Every earned stripe or belt opens a clear post-attack reward ceremony before the next question begins.
 - Wrong answers and timeouts reset the streak and trigger exactly one sibling counterattack.
