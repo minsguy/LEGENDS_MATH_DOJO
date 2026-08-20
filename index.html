@@ -184,7 +184,13 @@
     .speech-bubble.punchline { background: #fff0fc; box-shadow: 0 8px 0 #20162f, 0 20px 45px rgba(240,79,165,.36); }
     .speech-text { display: block; }
     .speech-hint { display: block; color: #73506f; font-size: .68rem; letter-spacing: .11em; text-transform: uppercase; }
-    .speech-bubble .math-punchline { color: #9d2b96; font-size: 1.18em; text-transform: uppercase; }
+    .speech-bubble .math-punchline {
+      display: block;
+      margin-top: 8px;
+      color: #9d2b96;
+      font-size: 1.18em;
+      text-transform: uppercase;
+    }
 
     .practice-board {
       position: absolute;
@@ -931,7 +937,12 @@
       .intro-label { top: max(17px, env(safe-area-inset-top)); inset-inline: 0; width: auto; transform: none; padding: 0 80px 0 8px; font-size: .56rem; letter-spacing: .1em; text-align: center; white-space: normal; }
       .speech-bubble { top: 9%; left: 4%; width: 92%; min-height: 106px; padding: 15px 18px; }
       .intro-legend { width: min(88vw, 410px); height: 69%; bottom: 1%; }
-      .intro-legend.warming-up { width: min(82vw, 350px); bottom: 12%; }
+      .speech-bubble.punchline { min-height: 142px; }
+      .intro-legend.warming-up {
+        width: min(72vw, 300px);
+        height: 60%;
+        bottom: max(20%, calc(env(safe-area-inset-bottom) + 64px));
+      }
       .practice-board { right: 1%; top: 55%; transform: scale(.76); }
       .intro-impact { top: 46%; left: 0; width: 100%; padding: 8px; text-align: center; transform: translateY(-50%) scale(0); }
       .intro-impact.pop { animation-name: intro-impact-pop-mobile; }
@@ -1128,7 +1139,7 @@
       const INTRO_LINES = [
         { html: 'Ugh. My dad is the <strong>WORST.</strong>', autoMs: 7000 },
         { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…', autoMs: 9000 },
-        { html: '<span class="math-punchline">…with MATH.</span>', autoMs: 6000, punchline: true },
+        { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…<span class="math-punchline">…with MATH.</span>', autoMs: 7000, punchline: true },
         { html: 'See ya!', autoMs: 5000 }
       ];
       const els = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(el => [el.id, el]));

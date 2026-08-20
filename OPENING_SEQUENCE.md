@@ -10,7 +10,7 @@ This work exists only on the `codex/opening-sequence` branch. GitHub Pages conti
 2. The conversation is split into four readable beats:
    - “Ugh. My dad is the WORST.”
    - “I can't do ANYTHING until I beat up my siblings…”
-   - “…with MATH.”
+   - The existing sentence remains visible and “…with MATH.” appears beneath it as the punchline.
    - “See ya!”
 3. Each line waits for a tap. A generous 5–9 second automatic fallback keeps the scene moving if the player does not tap.
 4. Legend hangs up with a visible “CLICK!”, switches into her kick pose, and performs two warm-up moves against a breakable practice board.
