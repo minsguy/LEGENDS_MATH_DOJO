@@ -57,6 +57,7 @@ A delayed retry uses the same displayed orientation that the player missed. When
 - Black is the v1 belt cap. Additional stripes may continue accumulating cosmetically without adding ranks.
 - Persist total successful streaks, belt, stripes, and per-fact learning data between sessions.
 - After the Legend's attack finishes, pause play for a full reward ceremony showing either “Stripe Earned!” or “New Belt Earned!”, the updated belt, and progress toward the next belt. The next timed fact starts only after “Keep Fighting!” is pressed.
+- Five Black Belt stripes unlock a persistent Final Black Belt Challenge. It presents every ordered equation from 0 × 0 through 9 × 9 once in random order; missed equations require untimed correction and return later until answered correctly under the timer. Completing all 100 awards the saved “Dojo Master” achievement.
 - A later play session begins with a small number of unresolved missed facts mixed into the opening questions.
 
 The belt thresholds and presentation are tunable during testing; the five-correct attack rule is the central mechanic.
@@ -102,6 +103,8 @@ Save:
 - total timed questions and successful streaks;
 - per canonical fact: attempts, timed correct answers, misses, timeouts, up to the five most recent response times, last seen time, and review priority;
 - unresolved missed-fact queue;
+- in-progress Final Black Belt Challenge order and completion count;
+- permanent Dojo Master achievement;
 - sound preference.
 
 Do not save a partial correction as though the fact were successfully recalled. If a session closes during correction, keep that fact in the next-session review queue.

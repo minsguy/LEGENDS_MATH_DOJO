@@ -413,6 +413,36 @@
       background: #f8f4e8;
     }
 
+    .master-badge {
+      width: fit-content;
+      margin: -3px auto 0;
+      padding: 9px 17px;
+      border: 3px solid #172033;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(135deg, #7b2cbf, #e639a8);
+      box-shadow: 0 5px 0 #172033;
+      font-size: .9rem;
+      font-weight: 1000;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .challenge-launch {
+      width: min(390px, 92vw);
+      margin: 0 auto;
+      padding: 13px 18px;
+      border: 3px solid #172033;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, #111827, #7b2cbf);
+      box-shadow: 0 6px 0 #172033;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .challenge-launch:active { transform: translateY(4px); box-shadow: 0 2px 0 #172033; }
+
     .opponent-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 280px));
@@ -728,6 +758,14 @@
     .streak-label { font-size: .82rem; font-weight: 1000; letter-spacing: .1em; text-transform: uppercase; }
 
     .streak-pips { display: flex; justify-content: center; gap: 7px; }
+
+    .challenge-progress {
+      color: #7b2cbf;
+      font-size: .86rem;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
     .pip {
       width: clamp(28px, 6vw, 42px);
@@ -1073,6 +1111,8 @@
         <span id="startBeltSwatch" class="belt-swatch"></span>
         <span><span id="startBelt">White Belt</span> · <span id="startStripes">0</span>/5 stripes</span>
       </div>
+      <div id="masterBadge" class="master-badge" hidden>★ Dojo Master ★</div>
+      <button id="challengeLaunch" class="challenge-launch" hidden>Begin the Final Black Belt Challenge</button>
       <p class="eyebrow">Choose your opponent</p>
       <div class="opponent-grid">
         <button class="opponent-card sister" data-opponent="sister" aria-label="Practice against Sister">
@@ -1125,6 +1165,7 @@
         <div id="questionCard" class="question-card">
           <div class="streak-label">Combo <span id="streakCount">0</span>/5</div>
           <div id="streakPips" class="streak-pips" aria-label="Correct-answer streak"></div>
+          <div id="challengeProgress" class="challenge-progress" hidden>Final Challenge · 0/100 mastered</div>
           <div id="prompt" class="prompt">Ready!</div>
           <div id="fact" class="fact">2 × 2</div>
           <input id="answerDisplay" class="answer-display" type="text" inputmode="none" readonly aria-label="Your answer" autocomplete="off">
@@ -1154,7 +1195,7 @@
       <span class="reward-stars top" aria-hidden="true">★ &nbsp;✦&nbsp; ★ &nbsp;✦&nbsp; ★</span>
       <span class="reward-stars bottom" aria-hidden="true">★ &nbsp;✦&nbsp; ★ &nbsp;✦&nbsp; ★</span>
       <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle" aria-describedby="rewardCopy">
-        <p class="reward-eyebrow">Five in a row!</p>
+        <p id="rewardEyebrow" class="reward-eyebrow">Five in a row!</p>
         <h2 id="rewardTitle" class="reward-title">Stripe Earned!</h2>
         <div class="reward-belt-wrap">
           <div id="rewardBeltVisual" class="karate-belt" role="img" aria-label="White belt with one rank stripe">
@@ -1179,6 +1220,7 @@
 
       const STORAGE_KEY = 'legendsMathDojo.v1';
       const TIMER_SECONDS = 15;
+      const CHALLENGE_TOTAL = 100;
       const BELTS = [
         { name: 'White Belt', color: '#f8f4e8' },
         { name: 'Yellow Belt', color: '#ffd60a' },
@@ -1209,6 +1251,9 @@
         totalTimedCorrect: 0,
         successfulStreaks: 0,
         introSeen: false,
+        dojoMaster: false,
+        finalChallenge: null,
+        lastOpponent: 'sister',
         facts: {},
         reviewQueue: [],
         settings: { sound: true }
@@ -1233,6 +1278,9 @@
           merged.settings = { ...defaultState().settings, ...(parsed.settings || {}) };
           merged.facts = parsed.facts || {};
           merged.reviewQueue = Array.isArray(parsed.reviewQueue) ? parsed.reviewQueue : [];
+          merged.finalChallenge = parsed.finalChallenge && Array.isArray(parsed.finalChallenge.queue)
+            ? parsed.finalChallenge
+            : null;
           if (parsed.pendingQuestion) {
             addReviewItem(merged, parsed.pendingQuestion.a, parsed.pendingQuestion.b);
             merged.pendingQuestion = null;
@@ -1249,6 +1297,41 @@
       }
 
       function canonicalKey(a, b) { return `${Math.min(a,b)}x${Math.max(a,b)}`; }
+
+      function shuffled(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function createFinalChallenge() {
+        const equations = [];
+        for (let a = 0; a <= 9; a++) {
+          for (let b = 0; b <= 9; b++) {
+            equations.push({ a, b, key: canonicalKey(a, b), id: `${a}x${b}`, isReview: false });
+          }
+        }
+        return {
+          queue: shuffled(equations),
+          completed: 0,
+          opponent: state.lastOpponent || 'sister'
+        };
+      }
+
+      function finalChallengeEligible() {
+        return state.belt === BELTS.length - 1 && state.stripes >= 5 && !state.dojoMaster;
+      }
+
+      function startDojoChallenge() {
+        if (!finalChallengeEligible()) return;
+        if (!state.finalChallenge) state.finalChallenge = createFinalChallenge();
+        saveState();
+        els.rewardBackdrop.hidden = true;
+        startSession(state.finalChallenge.opponent || 'sister', state.finalChallenge);
+      }
 
       function addReviewItem(targetState, a, b) {
         const key = canonicalKey(a, b);
@@ -1274,6 +1357,13 @@
         els.startStripes.textContent = state.stripes;
         els.startSound.textContent = state.settings.sound ? '🔊 Sound On' : '🔇 Sound Off';
         els.startSound.setAttribute('aria-pressed', String(state.settings.sound));
+        els.masterBadge.hidden = !state.dojoMaster;
+        els.challengeLaunch.hidden = !finalChallengeEligible();
+        if (!els.challengeLaunch.hidden) {
+          els.challengeLaunch.textContent = state.finalChallenge
+            ? `Resume Final Challenge · ${state.finalChallenge.completed}/${CHALLENGE_TOTAL}`
+            : 'Begin the Final Black Belt Challenge';
+        }
       }
 
       function renderProgress() {
@@ -1438,6 +1528,14 @@
         }
       }
 
+      function renderChallengeProgress() {
+        const challenge = session?.challenge;
+        els.challengeProgress.hidden = !challenge;
+        if (challenge) {
+          els.challengeProgress.textContent = `Final Challenge · ${challenge.completed}/${CHALLENGE_TOTAL} mastered`;
+        }
+      }
+
       function resumeAfterLandscape() {
         if (session?.mode === 'orientation-paused') {
           const now = performance.now();
@@ -1468,7 +1566,7 @@
         }
       }
 
-      function startSession(opponent) {
+      function startSession(opponent, challenge = null) {
         const opponentData = opponent === 'brother'
           ? { name: 'Brother', image: 'assets/processed/brother-final.png', action: 'assets/processed/brother-kick.png' }
           : { name: 'Sister', image: 'assets/processed/sister-final.png', action: 'assets/processed/sister-chop.png' };
@@ -1479,11 +1577,15 @@
           current: null,
           mode: 'transition',
           answer: '',
+          challenge,
           dueRetries: [],
           lastKey: null,
           recentEasy: [],
-          openingReviews: state.reviewQueue.slice(0, 3).map((item, index) => ({ ...item, dueAt: index * 3 }))
+          openingReviews: challenge ? [] : state.reviewQueue.slice(0, 3).map((item, index) => ({ ...item, dueAt: index * 3 }))
         };
+        state.lastOpponent = opponent;
+        if (challenge) challenge.opponent = opponent;
+        saveState();
         els.opponentName.textContent = opponentData.name;
         els.opponentImage.src = opponentData.image;
         els.opponentAction.src = opponentData.action;
@@ -1493,7 +1595,12 @@
         els.gameScreen.hidden = false;
         renderProgress();
         renderStreak();
+        renderChallengeProgress();
         nextQuestion();
+      }
+
+      function chooseChallengeQuestion() {
+        return session.challenge?.queue[0] || null;
       }
 
       function chooseQuestion() {
@@ -1556,16 +1663,24 @@
         session.mode = 'transition';
         session.answer = '';
         renderAnswer();
-        const question = chooseQuestion();
+        const question = session.challenge ? chooseChallengeQuestion() : chooseQuestion();
+        if (!question) {
+          completeDojoMaster();
+          return;
+        }
         session.current = question;
         session.questionNumber += 1;
         session.lastKey = question.key;
-        session.recentEasy.push(Math.min(question.a, question.b) <= 1);
-        if (session.recentEasy.length > 5) session.recentEasy.shift();
+        if (!session.challenge) {
+          session.recentEasy.push(Math.min(question.a, question.b) <= 1);
+          if (session.recentEasy.length > 5) session.recentEasy.shift();
+        }
         const isCharging = session.streak === 4;
         els.fact.style.opacity = isCharging ? '0' : '1';
         els.fact.textContent = `${question.a} × ${question.b}`;
-        els.prompt.textContent = isCharging ? '⚡ Finish the combo! ⚡' : (question.isReview ? 'Rematch!' : 'Enter your answer');
+        els.prompt.textContent = isCharging
+          ? '⚡ Finish the combo! ⚡'
+          : (session.challenge ? `Dojo Master Challenge · ${session.challenge.completed + 1} of ${CHALLENGE_TOTAL}` : (question.isReview ? 'Rematch!' : 'Enter your answer'));
         els.timerTrack.classList.remove('untimed');
         els.timerFill.style.transform = 'scaleX(1)';
         state.pendingQuestion = { a: question.a, b: question.b };
@@ -1651,15 +1766,25 @@
         state.totalTimedCorrect += 1;
         const wasReview = state.reviewQueue.some(item => item.key === q.key);
         state.reviewQueue = state.reviewQueue.filter(item => item.key !== q.key);
+        if (session.challenge) {
+          const currentIndex = session.challenge.queue.findIndex(item => item.id === q.id);
+          if (currentIndex >= 0) session.challenge.queue.splice(currentIndex, 1);
+          session.challenge.completed += 1;
+          renderChallengeProgress();
+        }
         session.streak += 1;
         renderStreak();
         saveState();
         playTone('correct');
 
-        if (session.streak >= 5) {
+        if (session.challenge && session.challenge.queue.length === 0) {
+          performChallengeAttack(true);
+        } else if (session.challenge && session.streak >= 5) {
+          performChallengeAttack(false);
+        } else if (session.streak >= 5) {
           performLegendAttack();
         } else {
-          showToast(wasReview ? '⭐ Fact defeated! ⭐' : randomOf(CORRECT_WORDS), 560);
+          showToast(session.challenge ? `${session.challenge.completed}/${CHALLENGE_TOTAL} mastered!` : (wasReview ? '⭐ Fact defeated! ⭐' : randomOf(CORRECT_WORDS)), 560);
           setTimeout(nextQuestion, 650);
         }
       }
@@ -1678,8 +1803,17 @@
         state.totalQuestions += 1;
         session.streak = 0;
         addReviewItem(state, q.a, q.b);
-        session.dueRetries = session.dueRetries.filter(item => item.key !== q.key);
-        session.dueRetries.push({ key: q.key, a: q.a, b: q.b, dueAt: session.questionNumber + 2 + Math.floor(Math.random() * 3), missedAt: Date.now() });
+        if (session.challenge) {
+          const currentIndex = session.challenge.queue.findIndex(item => item.id === q.id);
+          const [missed] = currentIndex >= 0 ? session.challenge.queue.splice(currentIndex, 1) : [{ ...q }];
+          missed.isReview = true;
+          const retryIndex = Math.min(session.challenge.queue.length, 2 + Math.floor(Math.random() * 3));
+          session.challenge.queue.splice(retryIndex, 0, missed);
+          renderChallengeProgress();
+        } else {
+          session.dueRetries = session.dueRetries.filter(item => item.key !== q.key);
+          session.dueRetries.push({ key: q.key, a: q.a, b: q.b, dueAt: session.questionNumber + 2 + Math.floor(Math.random() * 3), missedAt: Date.now() });
+        }
         renderStreak();
         saveState();
         performOpponentAttack(isTimeout);
@@ -1701,6 +1835,23 @@
           renderProgress();
           clearAnimationClasses();
           showRewardCeremony(reward);
+        }, 1100);
+      }
+
+      function performChallengeAttack(finalStrike) {
+        session.mode = 'transition';
+        const attackClass = Math.random() < .5 ? 'attack-a' : 'attack-b';
+        els.legendFighter.classList.add('action-mode', attackClass);
+        els.opponentFighter.classList.add('hit');
+        showImpact(finalStrike ? 'MASTER STRIKE!' : randomOf(IMPACT_WORDS));
+        playTone('attack');
+        setTimeout(() => {
+          if (!session) return;
+          session.streak = 0;
+          renderStreak();
+          clearAnimationClasses();
+          if (finalStrike) completeDojoMaster();
+          else nextQuestion();
         }, 1100);
       }
 
@@ -1746,6 +1897,7 @@
       function awardStripe() {
         state.successfulStreaks += 1;
         let reward;
+        const previousStripes = state.stripes;
         if (state.belt < BELTS.length - 1) {
           state.stripes += 1;
           if (state.stripes >= 5) {
@@ -1759,6 +1911,10 @@
           state.stripes = Math.min(5, state.stripes + 1);
           reward = { type: 'stripe', belt: state.belt, stripes: state.stripes };
         }
+        reward.challengeUnlocked = state.belt === BELTS.length - 1
+          && previousStripes < 5
+          && state.stripes >= 5
+          && !state.dojoMaster;
         saveState();
         return reward;
       }
@@ -1766,11 +1922,21 @@
       function showRewardCeremony(reward) {
         if (!session) return;
         session.mode = 'reward';
+        session.challengeUnlockPending = false;
+        session.masterCeremony = false;
         const belt = BELTS[reward.belt];
         const isBlackBelt = reward.belt === BELTS.length - 1;
+        els.rewardEyebrow.textContent = 'Five in a row!';
+        els.rewardContinue.textContent = 'Keep Fighting!';
         els.rewardTitle.textContent = reward.type === 'belt' ? 'New Belt Earned!' : 'Stripe Earned!';
         els.rewardName.textContent = belt.name;
-        if (reward.type === 'belt') {
+        if (reward.challengeUnlocked) {
+          session.challengeUnlockPending = true;
+          els.rewardEyebrow.textContent = 'Black Belt · Five Stripes';
+          els.rewardTitle.textContent = 'Final Challenge Unlocked!';
+          els.rewardCopy.textContent = 'Master all 100 equations from 0 × 0 through 9 × 9 to become Dojo Master.';
+          els.rewardContinue.textContent = 'Begin Final Challenge!';
+        } else if (reward.type === 'belt') {
           els.rewardCopy.textContent = `Legend has advanced to ${belt.name}!`;
         } else if (isBlackBelt && reward.stripes >= 5) {
           els.rewardCopy.textContent = 'Legend earned the fifth Black Belt stripe!';
@@ -1796,8 +1962,49 @@
 
       function continueAfterReward() {
         if (!session || session.mode !== 'reward') return;
+        if (session.challengeUnlockPending) {
+          session.challengeUnlockPending = false;
+          startDojoChallenge();
+          return;
+        }
+        if (session.masterCeremony) {
+          session.masterCeremony = false;
+          finishSession();
+          return;
+        }
         els.rewardBackdrop.hidden = true;
         nextQuestion();
+      }
+
+      function completeDojoMaster() {
+        if (!session || state.dojoMaster) return;
+        cancelAnimationFrame(timerFrame);
+        state.dojoMaster = true;
+        state.finalChallenge = null;
+        state.pendingQuestion = null;
+        saveState();
+        session.challenge = null;
+        session.mode = 'reward';
+        session.masterCeremony = true;
+        renderChallengeProgress();
+        renderProgress();
+        els.rewardEyebrow.textContent = 'All 100 equations conquered!';
+        els.rewardTitle.textContent = 'DOJO MASTER!';
+        els.rewardName.textContent = 'Black Belt Master';
+        els.rewardCopy.textContent = 'Legend mastered every equation from 0 × 0 through 9 × 9 under the dojo timer!';
+        els.rewardContinue.textContent = 'Celebrate!';
+        els.rewardBeltVisual.style.setProperty('--belt-color', BELTS[BELTS.length - 1].color);
+        els.rewardBeltVisual.style.setProperty('--rank-color', '#ffca3a');
+        els.rewardBeltStripes.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+          const stripe = document.createElement('span');
+          stripe.className = 'belt-rank-stripe';
+          els.rewardBeltStripes.appendChild(stripe);
+        }
+        els.rewardBeltVisual.setAttribute('aria-label', 'Black Belt with five gold rank stripes');
+        els.rewardBackdrop.hidden = false;
+        playTone('reward');
+        requestAnimationFrame(() => els.rewardContinue.focus({ preventScroll: true }));
       }
 
       function showImpact(word) {
@@ -1833,6 +2040,7 @@
         session = null;
         els.rewardBackdrop.hidden = true;
         els.gameScreen.hidden = true;
+        els.challengeProgress.hidden = true;
         els.startScreen.hidden = false;
         updateHomeProgress();
       }
@@ -1890,6 +2098,7 @@
       els.introSkip.addEventListener('click', finishIntro);
       els.introSpeech.addEventListener('click', advanceIntroDialogue);
       els.replayIntro.addEventListener('click', playIntro);
+      els.challengeLaunch.addEventListener('click', startDojoChallenge);
       els.startSound.addEventListener('click', toggleSound);
       els.gameSound.addEventListener('click', toggleSound);
       window.addEventListener('beforeunload', () => {
