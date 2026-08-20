@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Legend's Math Dojo</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --paper: #fffaf0;
+      --red: #e63946;
+      --gold: #ffca3a;
+      --jade: #198754;
+      --blue: #277da1;
+      --shadow: 0 16px 45px rgba(30, 20, 12, .24);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Trebuchet MS", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #172033;
+    }
+
+    button, input, select { font: inherit; }
+    button { touch-action: manipulation; }
+    [hidden] { display: none !important; }
+
+    .app {
+      min-height: 100dvh;
+      overflow: hidden;
+      position: relative;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(255,255,255,.5), transparent 45%),
+        linear-gradient(135deg, #ffe7a8 0%, #f5b960 45%, #d6813c 100%);
+    }
+
+    .app::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      opacity: .09;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 7px);
+    }
+
+    .screen {
+      min-height: 100dvh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .start-screen {
+      display: grid;
+      align-content: center;
+      gap: 18px;
+      width: min(980px, 100%);
+      margin: 0 auto;
+      padding: max(24px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: #7c2d12;
+      font-size: clamp(.8rem, 2vw, 1rem);
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #172033;
+      font-size: clamp(2.25rem, 7vw, 4.8rem);
+      line-height: .93;
+      letter-spacing: -.05em;
+      text-shadow: 0 3px 0 rgba(255,255,255,.55);
+    }
+
+    .start-copy {
+      max-width: 650px;
+      margin: 0 auto;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+      font-weight: 700;
+    }
+
+    .belt-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: fit-content;
+      margin: 0 auto;
+      padding: 10px 18px;
+      border: 3px solid rgba(23,32,51,.85);
+      border-radius: 999px;
+      background: rgba(255,250,240,.8);
+      box-shadow: 0 5px 0 rgba(23,32,51,.2);
+      font-weight: 900;
+    }
+
+    .belt-swatch {
+      width: 56px;
+      height: 14px;
+      border: 2px solid #172033;
+      border-radius: 3px;
+      background: #f8f4e8;
+    }
+
+    .opponent-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 280px));
+      justify-content: center;
+      gap: 18px;
+      margin: 4px 0;
+    }
+
+    .opponent-card {
+      min-height: 300px;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+      border: 4px solid #172033;
+      border-radius: 26px;
+      color: white;
+      background: linear-gradient(150deg, #277da1, #173b62);
+      box-shadow: var(--shadow), 0 8px 0 #172033;
+      cursor: pointer;
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .opponent-card:last-child { background: linear-gradient(150deg, #9d4edd, #5a189a); }
+    .opponent-card:hover, .opponent-card:focus-visible { transform: translateY(-5px) rotate(-1deg); filter: brightness(1.08); }
+    .opponent-card:last-child:hover, .opponent-card:last-child:focus-visible { transform: translateY(-5px) rotate(1deg); }
+
+    .opponent-card img {
+      width: 100%;
+      height: 245px;
+      object-fit: contain;
+      object-position: center bottom;
+      display: block;
+      filter: drop-shadow(0 10px 8px rgba(0,0,0,.3));
+      transform: scale(1.08);
+      transform-origin: center bottom;
+    }
+
+    .opponent-card.sister img { transform: scale(1.3) translateY(9%); }
+
+    .opponent-label {
+      display: block;
+      position: absolute;
+      inset: auto 0 0;
+      padding: 15px 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,.88) 35%);
+      font-size: 1.35rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .secondary-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    .secondary-button, .icon-button, .finish-button {
+      border: 2px solid #172033;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(255,250,240,.9);
+      color: #172033;
+      box-shadow: 0 4px 0 rgba(23,32,51,.25);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .game-screen {
+      display: grid;
+      grid-template-rows: auto minmax(260px, 1fr) auto;
+      min-height: 100dvh;
+      background: #f4d49a;
+    }
+
+    .game-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: max(10px, env(safe-area-inset-top)) 14px 10px;
+      color: white;
+      background: #172033;
+      box-shadow: 0 5px 0 rgba(0,0,0,.2);
+      z-index: 20;
+    }
+
+    .header-center { display: grid; justify-items: center; min-width: 0; text-align: center; }
+    .belt-name { font-size: .68rem; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+
+    .karate-belt {
+      --belt-color: #f8f4e8;
+      --rank-color: #111827;
+      width: clamp(155px, 24vw, 220px);
+      height: 39px;
+      position: relative;
+      margin-top: 1px;
+      filter: drop-shadow(0 4px 2px rgba(0,0,0,.35));
+    }
+
+    .belt-strap,
+    .belt-knot,
+    .belt-tail {
+      position: absolute;
+      border: 1px solid rgba(0,0,0,.46);
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.13) 0 2px, rgba(0,0,0,.035) 2px 4px),
+        linear-gradient(180deg, rgba(255,255,255,.42), transparent 38%, rgba(0,0,0,.2)),
+        var(--belt-color);
+    }
+
+    .belt-strap {
+      inset: 3px 0 auto;
+      height: 20px;
+      border-radius: 3px;
+      box-shadow: inset 0 2px 1px rgba(255,255,255,.35), inset 0 -3px 2px rgba(0,0,0,.15);
+    }
+
+    .belt-knot {
+      z-index: 4;
+      top: 0;
+      left: 50%;
+      width: 30px;
+      height: 27px;
+      border-radius: 4px 7px 5px 6px;
+      transform: translateX(-50%) rotate(2deg) skewX(-7deg);
+      box-shadow: inset 3px 0 2px rgba(255,255,255,.2), inset -4px -3px 3px rgba(0,0,0,.17);
+    }
+
+    .belt-tail {
+      z-index: 2;
+      top: 19px;
+      left: 50%;
+      width: 58px;
+      height: 13px;
+      transform-origin: left center;
+      clip-path: polygon(0 0, 100% 8%, 94% 100%, 0 88%);
+    }
+
+    .belt-tail.left { transform: translateX(-3px) rotate(12deg); }
+    .belt-tail.right { transform: translateX(-1px) translateY(6px) rotate(-9deg); }
+
+    .belt-rank-stripes {
+      position: absolute;
+      z-index: 5;
+      top: 5px;
+      right: 14px;
+      height: 17px;
+      display: flex;
+      gap: 3px;
+    }
+
+    .belt-rank-stripe {
+      width: 5px;
+      height: 100%;
+      border: 1px solid rgba(0,0,0,.36);
+      background: linear-gradient(90deg, rgba(255,255,255,.25), transparent 40%), var(--rank-color);
+      box-shadow: 1px 0 1px rgba(255,255,255,.18);
+    }
+    .icon-button, .finish-button { padding: 8px 12px; color: white; border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.1); box-shadow: none; }
+
+    .dojo {
+      min-height: 310px;
+      overflow: hidden;
+      position: relative;
+      border-bottom: 7px solid #5b3824;
+      background:
+        linear-gradient(90deg, transparent 49.5%, rgba(68,40,23,.25) 49.5% 50.5%, transparent 50.5%),
+        repeating-linear-gradient(90deg, rgba(72,43,24,.15) 0 3px, transparent 3px 22%),
+        linear-gradient(#fff7dc 0 68%, #cab175 68% 72%, #b78c4e 72%);
+    }
+
+    .dojo::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 29%;
+      background: repeating-linear-gradient(90deg, rgba(64,44,25,.22) 0 2px, transparent 2px 80px), linear-gradient(#cfb16c, #a77942);
+      clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+    }
+
+    .dojo-sign {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-1deg);
+      padding: 6px 18px;
+      border: 4px solid #5b3824;
+      color: #7f1d1d;
+      background: #fffaf0;
+      box-shadow: 3px 4px 0 rgba(0,0,0,.16);
+      font-size: clamp(.8rem, 2vw, 1rem);
+      font-weight: 1000;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .fighter {
+      position: absolute;
+      bottom: 6%;
+      width: min(34vw, 300px);
+      height: 76%;
+      z-index: 3;
+      display: grid;
+      align-items: end;
+      justify-items: center;
+      transform-origin: center bottom;
+      will-change: transform, filter;
+    }
+
+    .fighter.legend { left: 2%; }
+    .fighter.opponent { right: 2%; }
+
+    .fighter img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 12px 8px rgba(0,0,0,.28));
+      pointer-events: none;
+    }
+
+    .fighter.opponent.sister .idle-sprite { transform: scale(1.18) translateY(8%); transform-origin: center bottom; }
+
+    .fighter .action-sprite {
+      display: none;
+      max-width: 160%;
+      max-height: 116%;
+      transform-origin: center center;
+    }
+
+    .fighter.action-mode .idle-sprite { display: none; }
+    .fighter.action-mode .action-sprite { display: block; }
+    .fighter.action-mode .nameplate { opacity: 0; }
+
+    .fighter.action-mode::before,
+    .fighter.action-mode::after {
+      content: "";
+      position: absolute;
+      top: 44%;
+      z-index: -1;
+      width: 55%;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 -18px 0 rgba(255,202,58,.8), 0 18px 0 rgba(230,57,70,.72);
+      opacity: .9;
+    }
+
+    .legend.action-mode::before,
+    .legend.action-mode::after { right: 75%; }
+    .opponent.action-mode::before,
+    .opponent.action-mode::after { left: 75%; }
+    .fighter.action-mode::after { width: 35%; transform: translateY(36px); opacity: .65; }
+
+    .nameplate {
+      position: absolute;
+      bottom: 1%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 11px;
+      border: 2px solid #172033;
+      border-radius: 999px;
+      color: white;
+      background: rgba(23,32,51,.9);
+      font-weight: 900;
+      z-index: 4;
+    }
+
+    .impact {
+      position: absolute;
+      left: 50%;
+      top: 38%;
+      transform: translate(-50%, -50%) scale(0);
+      z-index: 12;
+      padding: 20px;
+      color: #fff;
+      font-size: clamp(2.6rem, 9vw, 6rem);
+      font-weight: 1000;
+      font-style: italic;
+      letter-spacing: -.07em;
+      -webkit-text-stroke: 4px #172033;
+      paint-order: stroke fill;
+      text-shadow: 8px 8px 0 var(--red);
+      pointer-events: none;
+    }
+
+    .impact.show { animation: impact-pop .9s ease-out both; }
+
+    .question-zone {
+      display: grid;
+      grid-template-columns: minmax(250px, 1.05fr) minmax(250px, .95fr);
+      gap: 16px;
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 14px 16px max(14px, env(safe-area-inset-bottom));
+      background: #f4d49a;
+    }
+
+    .question-card, .keypad-card {
+      border: 3px solid #172033;
+      border-radius: 22px;
+      background: var(--paper);
+      box-shadow: 0 7px 0 #172033;
+    }
+
+    .question-card {
+      display: grid;
+      align-content: center;
+      gap: 9px;
+      min-height: 240px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+
+    .streak-label { font-size: .82rem; font-weight: 1000; letter-spacing: .1em; text-transform: uppercase; }
+
+    .streak-pips { display: flex; justify-content: center; gap: 7px; }
+
+    .pip {
+      width: clamp(28px, 6vw, 42px);
+      height: 11px;
+      border: 2px solid #172033;
+      border-radius: 99px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .pip.on { background: linear-gradient(90deg, #ff9f1c, #e63946); box-shadow: 0 0 11px rgba(230,57,70,.55); }
+
+    .prompt {
+      min-height: 1.4em;
+      color: #7c2d12;
+      font-size: .95rem;
+      font-weight: 900;
+    }
+
+    .fact {
+      color: #172033;
+      font-size: clamp(3rem, 10vw, 5.7rem);
+      font-weight: 1000;
+      line-height: .9;
+      letter-spacing: -.06em;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+
+    .answer-display {
+      width: min(210px, 90%);
+      height: 62px;
+      margin: 0 auto;
+      border: 3px solid #172033;
+      border-radius: 15px;
+      color: #172033;
+      background: white;
+      font-size: 2.35rem;
+      font-weight: 1000;
+      text-align: center;
+      outline: none;
+    }
+
+    .answer-display:focus { box-shadow: 0 0 0 5px rgba(39,125,161,.25); }
+    .answer-display.wrong { animation: input-shake .35s ease; border-color: var(--red); }
+
+    .timer-track {
+      height: 13px;
+      overflow: hidden;
+      border: 2px solid #172033;
+      border-radius: 99px;
+      background: #e5e7eb;
+    }
+
+    .timer-fill {
+      width: 100%;
+      height: 100%;
+      transform-origin: left center;
+      background: linear-gradient(90deg, #2a9d8f 0%, #ffca3a 58%, #e63946 100%);
+    }
+
+    .timer-track.untimed .timer-fill { transform: scaleX(1) !important; background: linear-gradient(90deg, #277da1, #9d4edd); }
+
+    .keypad-card { padding: 12px; }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      height: 100%;
+    }
+
+    .key {
+      min-height: 54px;
+      border: 2px solid #172033;
+      border-radius: 13px;
+      color: #172033;
+      background: #fff;
+      box-shadow: 0 4px 0 #172033;
+      font-size: 1.65rem;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .key:active { transform: translateY(3px); box-shadow: 0 1px 0 #172033; }
+    .key.action { color: white; background: #277da1; }
+    .key.submit { color: white; background: #198754; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(.85);
+      z-index: 40;
+      max-width: min(90vw, 430px);
+      padding: 20px 26px;
+      border: 4px solid #172033;
+      border-radius: 22px;
+      color: #172033;
+      background: #fffaf0;
+      box-shadow: 0 10px 0 #172033, 0 25px 70px rgba(0,0,0,.35);
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    .reward-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,202,58,.35), transparent 38%),
+        rgba(15,23,42,.86);
+      backdrop-filter: blur(7px);
+    }
+
+    .reward-stars {
+      position: absolute;
+      color: var(--gold);
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      letter-spacing: .35em;
+      text-shadow: 0 3px 0 #7c2d12;
+      animation: reward-stars 1.25s ease-in-out infinite alternate;
+    }
+
+    .reward-stars.top { top: 8%; transform: rotate(-7deg); }
+    .reward-stars.bottom { bottom: 8%; transform: rotate(7deg); animation-delay: -.65s; }
+
+    .reward-card {
+      width: min(520px, 100%);
+      position: relative;
+      z-index: 1;
+      padding: clamp(24px, 6vw, 42px) 22px 26px;
+      border: 5px solid #172033;
+      border-radius: 28px;
+      background: linear-gradient(155deg, #fffdf5, #ffe8a6);
+      box-shadow: 0 12px 0 #172033, 0 30px 90px rgba(0,0,0,.55);
+      text-align: center;
+      animation: reward-arrive .48s cubic-bezier(.2,1.25,.3,1);
+    }
+
+    .reward-eyebrow {
+      margin: 0 0 5px;
+      color: #9a3412;
+      font-size: .88rem;
+      font-weight: 1000;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .reward-title {
+      margin: 0;
+      font-size: clamp(2.2rem, 9vw, 4rem);
+      line-height: .95;
+      letter-spacing: -.04em;
+      text-transform: uppercase;
+      text-shadow: 0 3px 0 white;
+    }
+
+    .reward-belt-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 92px;
+      margin: 13px 0 2px;
+    }
+
+    .reward-belt-wrap .karate-belt { width: min(290px, 72vw); transform: scale(1.12); }
+
+    .reward-name { margin: 4px 0 0; font-size: 1.55rem; font-weight: 1000; }
+    .reward-copy { margin: 6px auto 19px; max-width: 370px; font-size: 1.03rem; font-weight: 800; }
+
+    .reward-button {
+      min-width: min(280px, 100%);
+      padding: 13px 20px;
+      border: 3px solid #172033;
+      border-radius: 999px;
+      color: white;
+      background: #198754;
+      box-shadow: 0 6px 0 #172033;
+      font-size: 1.12rem;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .reward-button:active { transform: translateY(4px); box-shadow: 0 2px 0 #172033; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15,23,42,.72);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal {
+      width: min(700px, 100%);
+      max-height: min(88dvh, 760px);
+      overflow: auto;
+      padding: 20px;
+      border: 4px solid #172033;
+      border-radius: 24px;
+      background: #fffaf0;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .modal h2 { margin: 0; font-size: 1.8rem; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+    .setting { padding: 13px; border: 2px solid #d1a35d; border-radius: 14px; background: #fff; }
+    .setting label { display: block; margin-bottom: 7px; font-weight: 900; }
+    .setting select { width: 100%; padding: 8px; border: 2px solid #172033; border-radius: 8px; }
+    .setting button { width: 100%; }
+
+    .stats-table-wrap { overflow: auto; max-height: 260px; border: 2px solid #172033; border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; background: white; }
+    th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
+    th { position: sticky; top: 0; background: #172033; color: white; }
+
+    .legend.attack-a { animation: legend-attack-a 1s cubic-bezier(.2,.8,.2,1); }
+    .legend.attack-b { animation: legend-attack-b 1s cubic-bezier(.2,.8,.2,1); }
+    .opponent.hit { animation: opponent-hit 1s ease-out; }
+    .opponent.attack-a { animation: opponent-attack-a 1s cubic-bezier(.2,.8,.2,1); }
+    .opponent.attack-b { animation: opponent-attack-b 1s cubic-bezier(.2,.8,.2,1); }
+    .legend.hit { animation: legend-hit 1s ease-out; }
+    .question-card.charge { animation: charge-card .55s ease; }
+
+    @keyframes legend-attack-a { 0% { transform: translateX(0) rotate(-8deg) scale(.8); } 18% { transform: translateX(6vw) rotate(-5deg) scale(.95); } 48% { transform: translateX(47vw) rotate(2deg) scale(1.24); } 63% { transform: translateX(43vw) rotate(-5deg) scale(1.13); } 100% { transform: translateX(0) rotate(0) scale(1); } }
+    @keyframes legend-attack-b { 0% { transform: translateX(0) rotate(-35deg) scale(.72); } 32% { transform: translateX(31vw) translateY(-38px) rotate(155deg) scale(1.08); } 52% { transform: translateX(48vw) translateY(0) rotate(365deg) scale(1.25); } 68% { transform: translateX(43vw) rotate(350deg) scale(1.1); } 100% { transform: translateX(0) rotate(360deg) scale(1); } }
+    @keyframes opponent-hit { 0%, 35% { transform: translateX(0) rotate(0); filter: brightness(1); } 50% { transform: translateX(34vw) rotate(18deg) scale(.88); filter: brightness(1.8); } 70% { transform: translateX(24vw) rotate(-9deg); } 100% { transform: none; } }
+    @keyframes opponent-attack-a { 0% { transform: translateX(0) rotate(8deg) scale(.8); } 18% { transform: translateX(-6vw) rotate(5deg) scale(.95); } 48% { transform: translateX(-47vw) rotate(-2deg) scale(1.24); } 63% { transform: translateX(-43vw) rotate(5deg) scale(1.13); } 100% { transform: translateX(0) rotate(0) scale(1); } }
+    @keyframes opponent-attack-b { 0% { transform: translateX(0) rotate(35deg) scale(.72); } 32% { transform: translateX(-31vw) translateY(-38px) rotate(-155deg) scale(1.08); } 52% { transform: translateX(-48vw) translateY(0) rotate(-365deg) scale(1.25); } 68% { transform: translateX(-43vw) rotate(-350deg) scale(1.1); } 100% { transform: translateX(0) rotate(-360deg) scale(1); } }
+    @keyframes legend-hit { 0%, 35% { transform: none; filter: brightness(1); } 50% { transform: translateX(-34vw) rotate(-18deg) scale(.88); filter: brightness(1.8); } 70% { transform: translateX(-24vw) rotate(9deg); } 100% { transform: none; } }
+    @keyframes impact-pop { 0% { transform: translate(-50%,-50%) scale(0) rotate(-18deg); opacity: 0; } 30% { transform: translate(-50%,-50%) scale(1.2) rotate(4deg); opacity: 1; } 75% { transform: translate(-50%,-50%) scale(.95) rotate(-2deg); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
+    @keyframes input-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    @keyframes charge-card { 0%,100% { box-shadow: 0 7px 0 #172033; } 50% { box-shadow: 0 7px 0 #172033, 0 0 35px 12px rgba(255,202,58,.9); transform: scale(1.02); } }
+    @keyframes reward-arrive { from { opacity: 0; transform: scale(.55) rotate(-5deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+    @keyframes reward-stars { from { opacity: .55; scale: .92; } to { opacity: 1; scale: 1.08; } }
+
+    @media (max-width: 680px) {
+      .opponent-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .opponent-card { min-height: 245px; }
+      .opponent-card img { height: 205px; }
+      .game-screen { grid-template-rows: auto minmax(235px, 41dvh) auto; }
+      .dojo { min-height: 235px; }
+      .fighter { width: 44vw; height: 72%; }
+      .question-zone { grid-template-columns: 1fr; gap: 10px; padding: 10px 10px max(14px, env(safe-area-inset-bottom)); }
+      .question-card { min-height: 215px; padding: 10px 14px; gap: 6px; }
+      .fact { font-size: clamp(3rem, 16vw, 4.7rem); }
+      .answer-display { height: 52px; font-size: 2rem; }
+      .keypad-card { padding: 8px; }
+      .keypad { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+      .key { min-height: 45px; font-size: 1.25rem; border-radius: 9px; }
+      .key[data-key="0"] { grid-column: auto; }
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-height: 760px) and (min-width: 681px) {
+      .game-screen { grid-template-rows: auto minmax(230px, 48dvh) auto; }
+      .question-card { min-height: 205px; }
+      .key { min-height: 42px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section id="startScreen" class="screen start-screen" aria-labelledby="title">
+      <p class="eyebrow">Five facts. One mighty move.</p>
+      <h1 id="title">Legend's<br>Math Dojo</h1>
+      <p class="start-copy">Get five multiplication facts right in a row to unleash an attack. Miss one, and your sibling gets the counter!</p>
+      <div class="belt-card" aria-live="polite">
+        <span id="startBeltSwatch" class="belt-swatch"></span>
+        <span><span id="startBelt">White Belt</span> · <span id="startStripes">0</span>/5 stripes</span>
+      </div>
+      <p class="eyebrow">Choose your opponent</p>
+      <div class="opponent-grid">
+        <button class="opponent-card sister" data-opponent="sister" aria-label="Practice against Sister">
+          <img src="assets/processed/sister-final.png" alt="Sister with crossed arms and sunglasses">
+          <span class="opponent-label">Sister</span>
+        </button>
+        <button class="opponent-card brother" data-opponent="brother" aria-label="Practice against Brother">
+          <img src="assets/processed/brother-final.png" alt="Brother holding an ice cream cone">
+          <span class="opponent-label">Brother</span>
+        </button>
+      </div>
+      <div class="secondary-row">
+        <button id="startSound" class="secondary-button" aria-pressed="true">🔊 Sound On</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen" hidden aria-label="Multiplication game">
+      <header class="game-header">
+        <button id="gameSound" class="icon-button" aria-label="Toggle sound">🔊</button>
+        <div class="header-center">
+          <div id="gameBelt" class="belt-name">White Belt</div>
+          <div id="beltVisual" class="karate-belt" role="img" aria-label="White belt with no rank stripes">
+            <span class="belt-strap"></span>
+            <span class="belt-knot"></span>
+            <span class="belt-tail left"></span>
+            <span class="belt-tail right"></span>
+            <span id="beltRankStripes" class="belt-rank-stripes" aria-hidden="true"></span>
+          </div>
+        </div>
+        <button id="finishButton" class="finish-button">Finish</button>
+      </header>
+
+      <div id="dojo" class="dojo" aria-live="polite">
+        <div class="dojo-sign">Math Dojo</div>
+        <div id="legendFighter" class="fighter legend">
+          <img class="idle-sprite" src="assets/processed/legend.png" alt="Legend">
+          <img class="action-sprite" src="assets/processed/legend-kick.png" alt="" aria-hidden="true">
+          <span class="nameplate">Legend</span>
+        </div>
+        <div id="opponentFighter" class="fighter opponent">
+          <img id="opponentImage" class="idle-sprite" src="assets/processed/sister-final.png" alt="Sister">
+          <img id="opponentAction" class="action-sprite" src="assets/processed/sister-chop.png" alt="" aria-hidden="true">
+          <span id="opponentName" class="nameplate">Sister</span>
+        </div>
+        <div id="impact" class="impact" aria-hidden="true">KAPOW!</div>
+      </div>
+
+      <section class="question-zone">
+        <div id="questionCard" class="question-card">
+          <div class="streak-label">Combo <span id="streakCount">0</span>/5</div>
+          <div id="streakPips" class="streak-pips" aria-label="Correct-answer streak"></div>
+          <div id="prompt" class="prompt">Ready!</div>
+          <div id="fact" class="fact">2 × 2</div>
+          <input id="answerDisplay" class="answer-display" type="text" inputmode="none" readonly aria-label="Your answer" autocomplete="off">
+          <div id="timerTrack" class="timer-track"><div id="timerFill" class="timer-fill"></div></div>
+        </div>
+
+        <div class="keypad-card">
+          <div id="keypad" class="keypad" aria-label="Number pad">
+            <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button>
+            <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button>
+            <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button>
+            <button class="key action" data-action="backspace" aria-label="Backspace">⌫</button><button class="key" data-key="0">0</button><button class="key submit" data-action="submit" aria-label="Submit answer">GO</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="assertive"></div>
+
+    <div id="rewardBackdrop" class="reward-backdrop" hidden>
+      <span class="reward-stars top" aria-hidden="true">★ &nbsp;✦&nbsp; ★ &nbsp;✦&nbsp; ★</span>
+      <span class="reward-stars bottom" aria-hidden="true">★ &nbsp;✦&nbsp; ★ &nbsp;✦&nbsp; ★</span>
+      <section class="reward-card" role="dialog" aria-modal="true" aria-labelledby="rewardTitle" aria-describedby="rewardCopy">
+        <p class="reward-eyebrow">Five in a row!</p>
+        <h2 id="rewardTitle" class="reward-title">Stripe Earned!</h2>
+        <div class="reward-belt-wrap">
+          <div id="rewardBeltVisual" class="karate-belt" role="img" aria-label="White belt with one rank stripe">
+            <span class="belt-strap"></span>
+            <span class="belt-knot"></span>
+            <span class="belt-tail left"></span>
+            <span class="belt-tail right"></span>
+            <span id="rewardBeltStripes" class="belt-rank-stripes" aria-hidden="true"></span>
+          </div>
+        </div>
+        <p id="rewardName" class="reward-name">White Belt</p>
+        <p id="rewardCopy" class="reward-copy">You earned stripe 1 of 5!</p>
+        <button id="rewardContinue" class="reward-button">Keep Fighting!</button>
+      </section>
+    </div>
+
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'legendsMathDojo.v1';
+      const TIMER_SECONDS = 12;
+      const BELTS = [
+        { name: 'White Belt', color: '#f8f4e8' },
+        { name: 'Yellow Belt', color: '#ffd60a' },
+        { name: 'Orange Belt', color: '#fb8500' },
+        { name: 'Green Belt', color: '#2a9d8f' },
+        { name: 'Blue Belt', color: '#277da1' },
+        { name: 'Purple Belt', color: '#7b2cbf' },
+        { name: 'Red Belt', color: '#e63946' },
+        { name: 'Brown Belt', color: '#7f5539' },
+        { name: 'Black Belt', color: '#111827' }
+      ];
+      const IMPACT_WORDS = ['KAPOW!', 'HI-YAH!', 'WHAM!', 'KICK!'];
+      const COUNTER_WORDS = ['BONK!', 'WHOOPS!', 'BAM!', 'BLOCKED!'];
+      const CORRECT_WORDS = ['Nice!', 'Yes!', 'Got it!', 'Strong!'];
+      const els = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(el => [el.id, el]));
+
+      const defaultState = () => ({
+        schemaVersion: 1,
+        belt: 0,
+        stripes: 0,
+        totalQuestions: 0,
+        totalTimedCorrect: 0,
+        successfulStreaks: 0,
+        facts: {},
+        reviewQueue: [],
+        settings: { sound: true }
+      });
+
+      let state = loadState();
+      let session = null;
+      let timerFrame = 0;
+      let audioContext = null;
+
+      function loadState() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!parsed || parsed.schemaVersion !== 1) return defaultState();
+          const merged = { ...defaultState(), ...parsed };
+          merged.settings = { ...defaultState().settings, ...(parsed.settings || {}) };
+          merged.facts = parsed.facts || {};
+          merged.reviewQueue = Array.isArray(parsed.reviewQueue) ? parsed.reviewQueue : [];
+          if (parsed.pendingQuestion) {
+            addReviewItem(merged, parsed.pendingQuestion.a, parsed.pendingQuestion.b);
+            merged.pendingQuestion = null;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          }
+          return merged;
+        } catch (_) {
+          return defaultState();
+        }
+      }
+
+      function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      }
+
+      function canonicalKey(a, b) { return `${Math.min(a,b)}x${Math.max(a,b)}`; }
+
+      function addReviewItem(targetState, a, b) {
+        const key = canonicalKey(a, b);
+        const existing = targetState.reviewQueue.find(item => item.key === key);
+        if (existing) {
+          existing.a = a;
+          existing.b = b;
+          existing.missedAt = Date.now();
+        } else {
+          targetState.reviewQueue.push({ key, a, b, missedAt: Date.now() });
+        }
+      }
+
+      function factStats(key) {
+        if (!state.facts[key]) state.facts[key] = { attempts: 0, correct: 0, misses: 0, timeouts: 0, responseTimes: [], lastSeen: 0 };
+        return state.facts[key];
+      }
+
+      function updateHomeProgress() {
+        const belt = BELTS[Math.min(state.belt, BELTS.length - 1)];
+        els.startBelt.textContent = belt.name;
+        els.startBeltSwatch.style.background = belt.color;
+        els.startStripes.textContent = state.stripes;
+        els.startSound.textContent = state.settings.sound ? '🔊 Sound On' : '🔇 Sound Off';
+        els.startSound.setAttribute('aria-pressed', String(state.settings.sound));
+      }
+
+      function renderProgress() {
+        const belt = BELTS[Math.min(state.belt, BELTS.length - 1)];
+        els.gameBelt.textContent = belt.name;
+        els.gameBelt.style.color = '#fff';
+        els.beltVisual.style.setProperty('--belt-color', belt.color);
+        els.beltVisual.style.setProperty('--rank-color', state.belt === BELTS.length - 1 ? '#ffca3a' : '#111827');
+        els.beltRankStripes.innerHTML = '';
+        for (let i = 0; i < state.stripes; i++) {
+          const stripe = document.createElement('span');
+          stripe.className = 'belt-rank-stripe';
+          els.beltRankStripes.appendChild(stripe);
+        }
+        els.beltVisual.setAttribute('aria-label', `${belt.name} with ${state.stripes} rank ${state.stripes === 1 ? 'stripe' : 'stripes'}`);
+      }
+
+      function renderStreak() {
+        els.streakCount.textContent = session ? session.streak : 0;
+        els.streakPips.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+          const pip = document.createElement('span');
+          pip.className = `pip${session && i < session.streak ? ' on' : ''}`;
+          els.streakPips.appendChild(pip);
+        }
+      }
+
+      function startSession(opponent) {
+        const opponentData = opponent === 'brother'
+          ? { name: 'Brother', image: 'assets/processed/brother-final.png', action: 'assets/processed/brother-kick.png' }
+          : { name: 'Sister', image: 'assets/processed/sister-final.png', action: 'assets/processed/sister-chop.png' };
+        session = {
+          opponent,
+          streak: 0,
+          questionNumber: 0,
+          current: null,
+          mode: 'transition',
+          answer: '',
+          dueRetries: [],
+          lastKey: null,
+          recentEasy: [],
+          openingReviews: state.reviewQueue.slice(0, 3).map((item, index) => ({ ...item, dueAt: index * 3 }))
+        };
+        els.opponentName.textContent = opponentData.name;
+        els.opponentImage.src = opponentData.image;
+        els.opponentAction.src = opponentData.action;
+        els.opponentImage.alt = opponentData.name;
+        els.opponentFighter.className = `fighter opponent ${opponent}`;
+        els.startScreen.hidden = true;
+        els.gameScreen.hidden = false;
+        renderProgress();
+        renderStreak();
+        nextQuestion();
+      }
+
+      function chooseQuestion() {
+        const due = session.dueRetries
+          .filter(item => item.dueAt <= session.questionNumber)
+          .sort((a,b) => a.missedAt - b.missedAt)[0];
+        if (due) {
+          session.dueRetries = session.dueRetries.filter(item => item !== due);
+          return { a: due.a, b: due.b, key: due.key, isReview: true };
+        }
+
+        const opening = session.openingReviews
+          .filter(item => item.dueAt <= session.questionNumber)
+          .sort((a,b) => a.dueAt - b.dueAt)[0];
+        if (opening) {
+          session.openingReviews = session.openingReviews.filter(item => item !== opening);
+          return { a: opening.a, b: opening.b, key: opening.key, isReview: true };
+        }
+
+        const candidates = [];
+        const rebuildingBeforeRetry = session.dueRetries.some(item => item.dueAt > session.questionNumber);
+        for (let low = 0; low <= 9; low++) {
+          for (let high = low; high <= 9; high++) {
+            const key = `${low}x${high}`;
+            if (key === session.lastKey) continue;
+            const easy = low <= 1;
+            if (easy && session.recentEasy.filter(Boolean).length >= 1) continue;
+            const stats = state.facts[key];
+            const attempts = stats?.attempts || 0;
+            const accuracy = attempts ? (stats.correct || 0) / attempts : 0;
+            const ageHours = stats?.lastSeen ? (Date.now() - stats.lastSeen) / 3600000 : 999;
+            let weight = attempts === 0 ? 7 : 2 + (1 - accuracy) * 9 + Math.min(ageHours / 12, 4);
+            if (rebuildingBeforeRetry && attempts > 0) {
+              if (accuracy >= .8) weight += 10;
+              else if (accuracy < .5) weight *= .35;
+            }
+            if (easy) weight *= .38;
+            candidates.push({ low, high, key, weight, easy });
+          }
+        }
+        const selected = weightedPick(candidates);
+        const flip = selected.low !== selected.high && Math.random() < .5;
+        return { a: flip ? selected.high : selected.low, b: flip ? selected.low : selected.high, key: selected.key, isReview: false };
+      }
+
+      function weightedPick(items) {
+        const total = items.reduce((sum, item) => sum + item.weight, 0);
+        let cursor = Math.random() * total;
+        for (const item of items) {
+          cursor -= item.weight;
+          if (cursor <= 0) return item;
+        }
+        return items[items.length - 1];
+      }
+
+      function nextQuestion() {
+        if (!session) return;
+        cancelAnimationFrame(timerFrame);
+        clearAnimationClasses();
+        session.mode = 'transition';
+        session.answer = '';
+        renderAnswer();
+        const question = chooseQuestion();
+        session.current = question;
+        session.questionNumber += 1;
+        session.lastKey = question.key;
+        session.recentEasy.push(Math.min(question.a, question.b) <= 1);
+        if (session.recentEasy.length > 5) session.recentEasy.shift();
+        const isCharging = session.streak === 4;
+        els.fact.style.opacity = isCharging ? '0' : '1';
+        els.fact.textContent = `${question.a} × ${question.b}`;
+        els.prompt.textContent = isCharging ? '⚡ Finish the combo! ⚡' : (question.isReview ? 'Rematch!' : 'Enter your answer');
+        els.timerTrack.classList.remove('untimed');
+        els.timerFill.style.transform = 'scaleX(1)';
+        state.pendingQuestion = { a: question.a, b: question.b };
+        saveState();
+
+        if (isCharging) {
+          els.questionCard.classList.add('charge');
+          setTimeout(() => {
+            if (!session || session.current !== question) return;
+            els.fact.style.opacity = '1';
+            startTimedAttempt();
+          }, 550);
+        } else {
+          startTimedAttempt();
+        }
+      }
+
+      function startTimedAttempt() {
+        session.mode = 'timed';
+        session.startedAt = performance.now();
+        session.deadline = session.startedAt + TIMER_SECONDS * 1000;
+        els.answerDisplay.focus({ preventScroll: true });
+        tickTimer();
+      }
+
+      function tickTimer(now = performance.now()) {
+        if (!session || session.mode !== 'timed') return;
+        const remaining = Math.max(0, (session.deadline - now) / (TIMER_SECONDS * 1000));
+        els.timerFill.style.transform = `scaleX(${remaining})`;
+        if (remaining <= 0) {
+          handleMiss(true);
+          return;
+        }
+        timerFrame = requestAnimationFrame(tickTimer);
+      }
+
+      function appendDigit(digit) {
+        if (!session || !['timed', 'correction'].includes(session.mode)) return;
+        if (session.answer.length >= 2) return;
+        session.answer += digit;
+        renderAnswer();
+      }
+
+      function backspace() {
+        if (!session || !['timed', 'correction'].includes(session.mode)) return;
+        session.answer = session.answer.slice(0, -1);
+        renderAnswer();
+      }
+
+      function renderAnswer() { els.answerDisplay.value = session?.answer || ''; }
+
+      function submitAnswer() {
+        if (!session || !['timed', 'correction'].includes(session.mode) || session.answer === '') return;
+        const expected = session.current.a * session.current.b;
+        const submitted = Number(session.answer);
+        if (session.mode === 'correction') {
+          if (submitted === expected) finishCorrection();
+          else correctionWrong();
+          return;
+        }
+        if (submitted === expected) handleCorrect();
+        else handleMiss(false);
+      }
+
+      function handleCorrect() {
+        cancelAnimationFrame(timerFrame);
+        const q = session.current;
+        const elapsed = Math.min(TIMER_SECONDS * 1000, performance.now() - session.startedAt);
+        session.mode = 'transition';
+        state.pendingQuestion = null;
+        const stats = factStats(q.key);
+        stats.attempts += 1;
+        stats.correct += 1;
+        stats.lastSeen = Date.now();
+        stats.responseTimes = [...stats.responseTimes, Math.round(elapsed)].slice(-5);
+        state.totalQuestions += 1;
+        state.totalTimedCorrect += 1;
+        const wasReview = state.reviewQueue.some(item => item.key === q.key);
+        state.reviewQueue = state.reviewQueue.filter(item => item.key !== q.key);
+        session.streak += 1;
+        renderStreak();
+        saveState();
+        playTone('correct');
+
+        if (session.streak >= 5) {
+          performLegendAttack();
+        } else {
+          showToast(wasReview ? '⭐ Fact defeated! ⭐' : randomOf(CORRECT_WORDS), 560);
+          setTimeout(nextQuestion, 650);
+        }
+      }
+
+      function handleMiss(isTimeout) {
+        if (!session || session.mode !== 'timed') return;
+        cancelAnimationFrame(timerFrame);
+        const q = session.current;
+        session.mode = 'transition';
+        state.pendingQuestion = null;
+        const stats = factStats(q.key);
+        stats.attempts += 1;
+        stats.misses += 1;
+        stats.lastSeen = Date.now();
+        if (isTimeout) stats.timeouts += 1;
+        state.totalQuestions += 1;
+        session.streak = 0;
+        addReviewItem(state, q.a, q.b);
+        session.dueRetries = session.dueRetries.filter(item => item.key !== q.key);
+        session.dueRetries.push({ key: q.key, a: q.a, b: q.b, dueAt: session.questionNumber + 2 + Math.floor(Math.random() * 3), missedAt: Date.now() });
+        renderStreak();
+        saveState();
+        performOpponentAttack(isTimeout);
+      }
+
+      function performLegendAttack() {
+        session.mode = 'transition';
+        const attackClass = Math.random() < .5 ? 'attack-a' : 'attack-b';
+        els.legendFighter.classList.add('action-mode');
+        els.legendFighter.classList.add(attackClass);
+        els.opponentFighter.classList.add('hit');
+        showImpact(randomOf(IMPACT_WORDS));
+        playTone('attack');
+        const reward = awardStripe();
+        setTimeout(() => {
+          if (!session) return;
+          session.streak = 0;
+          renderStreak();
+          renderProgress();
+          clearAnimationClasses();
+          showRewardCeremony(reward);
+        }, 1100);
+      }
+
+      function performOpponentAttack(isTimeout) {
+        const attackClass = Math.random() < .5 ? 'attack-a' : 'attack-b';
+        els.opponentFighter.classList.add('action-mode');
+        els.opponentFighter.classList.add(attackClass);
+        els.legendFighter.classList.add('hit');
+        showImpact(randomOf(COUNTER_WORDS));
+        playTone('miss');
+        setTimeout(() => enterCorrection(isTimeout), 1050);
+      }
+
+      function enterCorrection(isTimeout) {
+        if (!session) return;
+        clearAnimationClasses();
+        session.mode = 'correction';
+        session.answer = '';
+        renderAnswer();
+        els.timerTrack.classList.add('untimed');
+        els.prompt.textContent = isTimeout ? 'Time! Keep trying — no timer.' : 'Not quite! Keep trying — no timer.';
+        els.fact.textContent = `${session.current.a} × ${session.current.b}`;
+        els.answerDisplay.focus({ preventScroll: true });
+      }
+
+      function finishCorrection() {
+        session.mode = 'transition';
+        playTone('correct');
+        showToast('Good correction! You learned it.', 650);
+        setTimeout(nextQuestion, 720);
+      }
+
+      function correctionWrong() {
+        session.answer = '';
+        renderAnswer();
+        els.answerDisplay.classList.remove('wrong');
+        void els.answerDisplay.offsetWidth;
+        els.answerDisplay.classList.add('wrong');
+        els.prompt.textContent = 'Not yet — keep trying. There is no timer.';
+        playTone('nudge');
+      }
+
+      function awardStripe() {
+        state.successfulStreaks += 1;
+        let reward;
+        if (state.belt < BELTS.length - 1) {
+          state.stripes += 1;
+          if (state.stripes >= 5) {
+            state.stripes = 0;
+            state.belt += 1;
+            reward = { type: 'belt', belt: state.belt, stripes: state.stripes };
+          } else {
+            reward = { type: 'stripe', belt: state.belt, stripes: state.stripes };
+          }
+        } else {
+          state.stripes = Math.min(5, state.stripes + 1);
+          reward = { type: 'stripe', belt: state.belt, stripes: state.stripes };
+        }
+        saveState();
+        return reward;
+      }
+
+      function showRewardCeremony(reward) {
+        if (!session) return;
+        session.mode = 'reward';
+        const belt = BELTS[reward.belt];
+        const isBlackBelt = reward.belt === BELTS.length - 1;
+        els.rewardTitle.textContent = reward.type === 'belt' ? 'New Belt Earned!' : 'Stripe Earned!';
+        els.rewardName.textContent = belt.name;
+        if (reward.type === 'belt') {
+          els.rewardCopy.textContent = `Legend has advanced to ${belt.name}!`;
+        } else if (isBlackBelt && reward.stripes >= 5) {
+          els.rewardCopy.textContent = 'Legend earned the fifth Black Belt stripe!';
+        } else {
+          const nextBelt = BELTS[Math.min(reward.belt + 1, BELTS.length - 1)].name;
+          els.rewardCopy.textContent = isBlackBelt
+            ? `Legend earned Black Belt stripe ${reward.stripes} of 5!`
+            : `Stripe ${reward.stripes} of 5 toward ${nextBelt}!`;
+        }
+        els.rewardBeltVisual.style.setProperty('--belt-color', belt.color);
+        els.rewardBeltVisual.style.setProperty('--rank-color', isBlackBelt ? '#ffca3a' : '#111827');
+        els.rewardBeltStripes.innerHTML = '';
+        for (let i = 0; i < reward.stripes; i++) {
+          const stripe = document.createElement('span');
+          stripe.className = 'belt-rank-stripe';
+          els.rewardBeltStripes.appendChild(stripe);
+        }
+        els.rewardBeltVisual.setAttribute('aria-label', `${belt.name} with ${reward.stripes} rank ${reward.stripes === 1 ? 'stripe' : 'stripes'}`);
+        els.rewardBackdrop.hidden = false;
+        playTone('reward');
+        requestAnimationFrame(() => els.rewardContinue.focus({ preventScroll: true }));
+      }
+
+      function continueAfterReward() {
+        if (!session || session.mode !== 'reward') return;
+        els.rewardBackdrop.hidden = true;
+        nextQuestion();
+      }
+
+      function showImpact(word) {
+        els.impact.textContent = word;
+        els.impact.classList.remove('show');
+        void els.impact.offsetWidth;
+        els.impact.classList.add('show');
+      }
+
+      function clearAnimationClasses() {
+        ['attack-a','attack-b','hit','action-mode'].forEach(name => {
+          els.legendFighter.classList.remove(name);
+          els.opponentFighter.classList.remove(name);
+        });
+        els.impact.classList.remove('show');
+        els.questionCard.classList.remove('charge');
+        els.answerDisplay.classList.remove('wrong');
+        els.fact.style.opacity = '1';
+      }
+
+      function showToast(message, duration = 650) {
+        els.toast.textContent = message;
+        els.toast.classList.add('show');
+        clearTimeout(showToast.timeout);
+        showToast.timeout = setTimeout(() => els.toast.classList.remove('show'), duration);
+      }
+
+      function finishSession() {
+        cancelAnimationFrame(timerFrame);
+        if (session?.mode === 'timed' && session.current) addReviewItem(state, session.current.a, session.current.b);
+        state.pendingQuestion = null;
+        saveState();
+        session = null;
+        els.rewardBackdrop.hidden = true;
+        els.gameScreen.hidden = true;
+        els.startScreen.hidden = false;
+        updateHomeProgress();
+      }
+
+      function randomOf(items) { return items[Math.floor(Math.random() * items.length)]; }
+
+      function toggleSound() {
+        state.settings.sound = !state.settings.sound;
+        saveState();
+        updateHomeProgress();
+        els.gameSound.textContent = state.settings.sound ? '🔊' : '🔇';
+        els.gameSound.setAttribute('aria-label', state.settings.sound ? 'Turn sound off' : 'Turn sound on');
+        if (state.settings.sound) playTone('correct');
+      }
+
+      function playTone(kind) {
+        if (!state.settings.sound) return;
+        try {
+          audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+          if (audioContext.state === 'suspended') audioContext.resume();
+          const now = audioContext.currentTime;
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          const settings = {
+            correct: [620, .09, 'sine'], attack: [160, .18, 'sawtooth'], miss: [110, .18, 'square'], nudge: [220, .08, 'sine'], reward: [520, .34, 'triangle']
+          }[kind] || [440, .08, 'sine'];
+          oscillator.type = settings[2];
+          oscillator.frequency.setValueAtTime(settings[0], now);
+          if (kind === 'correct' || kind === 'reward') oscillator.frequency.exponentialRampToValueAtTime(kind === 'reward' ? 1040 : 920, now + settings[1]);
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(.13, now + .01);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + settings[1]);
+          oscillator.connect(gain).connect(audioContext.destination);
+          oscillator.start(now);
+          oscillator.stop(now + settings[1] + .02);
+        } catch (_) {}
+      }
+
+      document.querySelectorAll('[data-opponent]').forEach(button => button.addEventListener('click', () => startSession(button.dataset.opponent)));
+      els.keypad.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.dataset.key !== undefined) appendDigit(button.dataset.key);
+        if (button.dataset.action === 'backspace') backspace();
+        if (button.dataset.action === 'submit') submitAnswer();
+      });
+      document.addEventListener('keydown', event => {
+        if (!session) return;
+        if (/^[0-9]$/.test(event.key)) { event.preventDefault(); appendDigit(event.key); }
+        else if (event.key === 'Backspace' || event.key === 'Delete') { event.preventDefault(); backspace(); }
+        else if (event.key === 'Enter') { event.preventDefault(); submitAnswer(); }
+      });
+      els.finishButton.addEventListener('click', finishSession);
+      els.rewardContinue.addEventListener('click', continueAfterReward);
+      els.startSound.addEventListener('click', toggleSound);
+      els.gameSound.addEventListener('click', toggleSound);
+      window.addEventListener('beforeunload', () => {
+        if (session?.mode === 'timed' && session.current) state.pendingQuestion = { a: session.current.a, b: session.current.b };
+        saveState();
+      });
+
+      updateHomeProgress();
+      els.gameSound.textContent = state.settings.sound ? '🔊' : '🔇';
+    })();
+  </script>
+</body>
+</html>
