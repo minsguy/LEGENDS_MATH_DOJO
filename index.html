@@ -132,79 +132,13 @@
     }
 
     .intro-legend .intro-action { display: none; }
-    .intro-legend.warming-up .intro-idle { display: none; }
+    .intro-legend.warming-up .intro-phone-sprite { display: none; }
     .intro-legend.warming-up .intro-action { display: block; }
 
-    .intro-phone-string {
-      position: absolute;
-      z-index: 3;
-      inset: 23% 7% auto;
-      width: 86%;
-      height: 35%;
-      overflow: visible;
-      opacity: 0;
-      transition: opacity .2s ease;
-    }
-
-    .intro-phone-string path {
-      fill: none;
-      stroke: #ffd6ec;
-      stroke-width: 5;
-      stroke-linecap: round;
-      stroke-dasharray: 8 9;
-      filter: drop-shadow(0 3px 1px rgba(0,0,0,.4));
-    }
-
-    .intro-can {
-      position: absolute;
-      z-index: 9;
-      width: 62px;
-      height: 82px;
-      border: 4px solid #20162f;
-      border-radius: 9px 9px 17px 17px;
-      box-shadow: inset 0 5px 0 rgba(255,255,255,.35), inset 0 -8px 0 rgba(0,0,0,.18), 0 8px 12px rgba(0,0,0,.35);
-      opacity: 0;
-    }
-
-    .intro-can::before {
-      content: "";
-      position: absolute;
-      inset: -8px -7px auto;
-      height: 15px;
-      border: 4px solid #20162f;
-      border-radius: 50%;
-      background: #2b183d;
-      box-shadow: inset 0 3px 0 rgba(255,255,255,.25);
-    }
-
-    .intro-can::after {
-      content: "";
-      position: absolute;
-      inset: 16px 7px;
-      border-radius: 4px;
-      opacity: .32;
-      background: repeating-linear-gradient(0deg, transparent 0 7px, white 7px 10px);
-    }
-
-    .intro-can.caller {
-      top: 29%;
-      left: 5%;
-      background: linear-gradient(90deg, #f04fa5, #ff8fd0 48%, #c32988);
-      transform: rotate(18deg);
-    }
-
-    .intro-can.legend-phone {
-      top: 29%;
-      left: calc(50% + 43px);
-      background: linear-gradient(90deg, #6a29a7, #b968e1 48%, #5b1d96);
-      transform: rotate(-20deg) scale(.78);
-      transform-origin: center bottom;
-    }
-
-    .intro-phone-active .intro-phone-string,
-    .intro-phone-active .intro-can { opacity: 1; }
-    .intro-phone-active .intro-can.caller { animation: can-ring .18s ease-in-out 5 alternate; }
-    .intro-phone-active .intro-can.legend-phone { animation: answer-can .65s cubic-bezier(.2,.9,.3,1) both; }
+    .intro-legend.phone-enter { animation: intro-phone-enter .8s cubic-bezier(.2,1.15,.3,1) both; }
+    .intro-legend.talking .intro-phone-sprite { animation: intro-phone-sway 4s ease-in-out infinite; }
+    .intro-legend.reaction { animation: intro-phone-reaction .42s ease-out; }
+    .intro-legend.hanging-up .intro-phone-sprite { animation: intro-phone-hangup 1.15s ease-in both; }
 
     .speech-bubble {
       position: absolute;
@@ -214,8 +148,10 @@
       width: min(72%, 470px);
       min-height: 114px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 10px;
       padding: 18px 24px;
       border: 4px solid #20162f;
       border-radius: 28px 28px 6px 28px;
@@ -226,6 +162,9 @@
       font-weight: 1000;
       line-height: 1.08;
       text-align: center;
+      appearance: none;
+      cursor: pointer;
+      pointer-events: none;
       opacity: 0;
       transform: translateY(-18px) scale(.88);
       transition: opacity .2s ease, transform .25s cubic-bezier(.2,1.3,.3,1);
@@ -234,14 +173,17 @@
     .speech-bubble::after {
       content: "";
       position: absolute;
-      right: 15%;
+      right: 43%;
       bottom: -27px;
       border: 14px solid transparent;
       border-top: 18px solid #20162f;
       transform: rotate(-12deg);
     }
 
-    .speech-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+    .speech-bubble.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .speech-bubble.punchline { background: #fff0fc; box-shadow: 0 8px 0 #20162f, 0 20px 45px rgba(240,79,165,.36); }
+    .speech-text { display: block; }
+    .speech-hint { display: block; color: #73506f; font-size: .68rem; letter-spacing: .11em; text-transform: uppercase; }
     .speech-bubble .math-punchline { color: #9d2b96; font-size: 1.18em; text-transform: uppercase; }
 
     .practice-board {
@@ -302,6 +244,23 @@
 
     .intro-impact.pop { animation: intro-impact-pop .7s ease-out both; }
 
+    .intro-click {
+      position: absolute;
+      z-index: 15;
+      top: 46%;
+      left: 50%;
+      color: #ffc8ec;
+      font-size: clamp(1.5rem, 6vw, 3rem);
+      font-weight: 1000;
+      font-style: italic;
+      letter-spacing: .08em;
+      text-shadow: 4px 4px 0 #20162f;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.6) rotate(-6deg);
+    }
+
+    .intro-click.show { animation: intro-click-pop .75s ease-out both; }
+
     .intro-finale {
       position: absolute;
       z-index: 18;
@@ -326,8 +285,11 @@
     .intro-legend.kick-one { animation: intro-kick-one 1s cubic-bezier(.2,.8,.2,1); }
     .intro-legend.kick-two { animation: intro-kick-two 1s cubic-bezier(.2,.8,.2,1); }
 
-    @keyframes can-ring { from { transform: rotate(12deg); } to { transform: rotate(24deg) translateY(-3px); } }
-    @keyframes answer-can { 0% { opacity: 0; transform: translate(38px,65px) rotate(30deg) scale(.55); } 100% { opacity: 1; transform: rotate(-20deg) scale(.78); } }
+    @keyframes intro-phone-enter { 0% { opacity: 0; transform: translateX(-50%) translateY(45px) scale(.88) rotate(-3deg); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1) rotate(0); } }
+    @keyframes intro-phone-sway { 0%,100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg) translateY(-3px); } }
+    @keyframes intro-phone-reaction { 0%,100% { transform: translateX(-50%) rotate(0) scale(1); } 45% { transform: translateX(-50%) rotate(-2.5deg) scale(1.025); } }
+    @keyframes intro-phone-hangup { 0% { opacity: 1; transform: rotate(0) translateY(0); } 55% { opacity: 1; transform: rotate(4deg) translateY(12px); } 100% { opacity: 0; transform: rotate(7deg) translateY(55px); } }
+    @keyframes intro-click-pop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.55) rotate(-8deg); } 30%,70% { opacity: 1; transform: translate(-50%,-50%) scale(1.08) rotate(2deg); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.2); } }
     @keyframes intro-kick-one { 0% { transform: translateX(-50%) scale(.82) rotate(-8deg); } 25% { transform: translateX(-45%) scale(.95) rotate(-3deg); } 52% { transform: translateX(-22%) scale(1.15) rotate(3deg); } 70% { transform: translateX(-27%) scale(1.08); } 100% { transform: translateX(-50%) scale(1); } }
     @keyframes intro-kick-two { 0% { transform: translateX(-50%) scale(.78) rotate(-24deg); } 34% { transform: translateX(-40%) translateY(-35px) scale(1.02) rotate(155deg); } 58% { transform: translateX(-19%) scale(1.18) rotate(360deg); } 100% { transform: translateX(-50%) scale(1) rotate(360deg); } }
     @keyframes intro-kick-mobile-one { 0% { transform: translateX(-66%) scale(.78) rotate(-6deg); } 28% { transform: translateX(-60%) scale(.9) rotate(-2deg); } 52% { transform: translateX(-48%) scale(1.02) rotate(2deg); } 72% { transform: translateX(-52%) scale(.96); } 100% { transform: translateX(-60%) scale(.88); } }
@@ -969,10 +931,6 @@
       .intro-label { top: max(17px, env(safe-area-inset-top)); inset-inline: 0; width: auto; transform: none; padding: 0 80px 0 8px; font-size: .56rem; letter-spacing: .1em; text-align: center; white-space: normal; }
       .speech-bubble { top: 9%; left: 4%; width: 92%; min-height: 106px; padding: 15px 18px; }
       .intro-legend { width: min(88vw, 410px); height: 69%; bottom: 1%; }
-      .intro-phone-string { inset: 35% 3% auto; width: 94%; height: 25%; }
-      .intro-can { width: 49px; height: 65px; }
-      .intro-can.caller { top: 31%; left: 2%; }
-      .intro-can.legend-phone { top: 48%; left: calc(50% + 20px); }
       .intro-legend.warming-up { width: min(82vw, 350px); bottom: 12%; }
       .practice-board { right: 1%; top: 55%; transform: scale(.76); }
       .intro-impact { top: 46%; left: 0; width: 100%; padding: 8px; text-align: center; transform: translateY(-50%) scale(0); }
@@ -1010,6 +968,7 @@
       .opponent.hit { animation-name: opponent-hit-reduced !important; animation-duration: 1s !important; }
       .legend.hit { animation-name: legend-hit-reduced !important; animation-duration: 1s !important; }
       .impact.show { animation-duration: .9s !important; }
+      .intro-legend.talking .intro-phone-sprite, .intro-legend.reaction { animation: none !important; }
       .intro-legend.kick-one, .intro-legend.kick-two { animation-name: intro-kick-one !important; animation-duration: 1s !important; }
       .intro-finale.show { animation-duration: .6s !important; }
     }
@@ -1026,20 +985,19 @@
       <button id="introSkip" class="intro-skip">Skip Intro</button>
       <div id="introStage" class="intro-stage">
         <p class="intro-label">A totally normal afternoon...</p>
-        <svg class="intro-phone-string" viewBox="0 0 700 260" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M28 120 C 165 250, 395 250, 630 105"></path>
-        </svg>
-        <div class="intro-can caller" aria-hidden="true"></div>
-        <div class="intro-can legend-phone" aria-hidden="true"></div>
-        <div id="introSpeech" class="speech-bubble" role="status" aria-live="polite"></div>
+        <button id="introSpeech" class="speech-bubble" type="button" aria-live="polite" aria-label="Continue dialogue">
+          <span id="introSpeechText" class="speech-text"></span>
+          <span class="speech-hint">Tap to continue ▶</span>
+        </button>
         <div id="introLegend" class="intro-legend">
-          <img class="intro-idle" src="assets/processed/legend.png" alt="Legend answering a tin-can phone">
+          <img class="intro-phone-sprite" src="assets/processed/legend-phone.png" alt="Legend talking on a purple and pink corded phone">
           <img class="intro-action" src="assets/processed/legend-kick.png" alt="Legend practicing a karate kick">
         </div>
         <div id="practiceBoard" class="practice-board" aria-hidden="true">
           <span class="board-half left"></span>
           <span class="board-half right"></span>
         </div>
+        <div id="introClick" class="intro-click" aria-hidden="true">CLICK!</div>
         <div id="introImpact" class="intro-impact" aria-hidden="true">HI-YAH!</div>
         <div id="introFinale" class="intro-finale" aria-hidden="true">LET'S<br>DO THIS!</div>
       </div>
@@ -1167,6 +1125,12 @@
       const IMPACT_WORDS = ['KAPOW!', 'HI-YAH!', 'WHAM!', 'KICK!'];
       const COUNTER_WORDS = ['BONK!', 'WHOOPS!', 'BAM!', 'BLOCKED!'];
       const CORRECT_WORDS = ['Nice!', 'Yes!', 'Got it!', 'Strong!'];
+      const INTRO_LINES = [
+        { html: 'Ugh. My dad is the <strong>WORST.</strong>', autoMs: 7000 },
+        { html: 'I can\'t do <strong>ANYTHING</strong> until I beat up my siblings…', autoMs: 9000 },
+        { html: '<span class="math-punchline">…with MATH.</span>', autoMs: 6000, punchline: true },
+        { html: 'See ya!', autoMs: 5000 }
+      ];
       const els = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(el => [el.id, el]));
 
       const defaultState = () => ({
@@ -1187,6 +1151,9 @@
       let timerFrame = 0;
       let audioContext = null;
       let introTimeouts = [];
+      let introAdvanceTimeout = 0;
+      let introLineIndex = -1;
+      let introAcceptingInput = false;
 
       function loadState() {
         try {
@@ -1271,11 +1238,9 @@
       function cancelIntroTimeline() {
         introTimeouts.forEach(clearTimeout);
         introTimeouts = [];
-      }
-
-      function setIntroSpeech(message) {
-        els.introSpeech.innerHTML = message;
-        els.introSpeech.classList.add('show');
+        clearTimeout(introAdvanceTimeout);
+        introAdvanceTimeout = 0;
+        introAcceptingInput = false;
       }
 
       function restartIntroClass(element, className) {
@@ -1284,45 +1249,78 @@
         element.classList.add(className);
       }
 
+      function setIntroSpeech(line) {
+        els.introSpeechText.innerHTML = line.html;
+        els.introSpeech.className = `speech-bubble${line.punchline ? ' punchline' : ''}`;
+        restartIntroClass(els.introLegend, 'reaction');
+        requestAnimationFrame(() => els.introSpeech.classList.add('show'));
+        introAcceptingInput = true;
+        introAdvanceTimeout = setTimeout(advanceIntroDialogue, line.autoMs);
+      }
+
+      function advanceIntroDialogue() {
+        if (!introAcceptingInput) return;
+        introAcceptingInput = false;
+        clearTimeout(introAdvanceTimeout);
+        introAdvanceTimeout = 0;
+        els.introSpeech.classList.remove('show');
+        const nextLine = introLineIndex + 1;
+        queueIntro(420, () => {
+          introLineIndex = nextLine;
+          if (introLineIndex < INTRO_LINES.length) setIntroSpeech(INTRO_LINES[introLineIndex]);
+          else beginIntroHangup();
+        });
+      }
+
+      function beginIntroHangup() {
+        els.introSpeech.classList.remove('show');
+        els.introLegend.classList.remove('talking', 'reaction');
+        els.introLegend.classList.add('hanging-up');
+        queueIntro(500, () => restartIntroClass(els.introClick, 'show'));
+        queueIntro(1200, beginIntroWarmup);
+      }
+
+      function beginIntroWarmup() {
+        els.introClick.classList.remove('show');
+        els.introLegend.className = 'intro-legend warming-up';
+        els.introStage.classList.add('intro-warmup');
+        restartIntroClass(els.introLegend, 'kick-one');
+        queueIntro(400, () => {
+          restartIntroClass(els.introImpact, 'pop');
+          els.practiceBoard.classList.add('broken');
+          playTone('attack');
+        });
+        queueIntro(1120, () => els.introLegend.classList.remove('kick-one'));
+        queueIntro(1320, () => {
+          restartIntroClass(els.introLegend, 'kick-two');
+          restartIntroClass(els.introImpact, 'pop');
+          playTone('attack');
+        });
+        queueIntro(2420, () => els.introFinale.classList.add('show'));
+        queueIntro(3920, finishIntro);
+      }
+
+      function beginIntroDialogue() {
+        introLineIndex = 0;
+        els.introLegend.classList.add('talking');
+        setIntroSpeech(INTRO_LINES[introLineIndex]);
+      }
+
       function playIntro() {
         cancelIntroTimeline();
         els.gameScreen.hidden = true;
         els.startScreen.hidden = true;
         els.introScreen.hidden = false;
         els.introStage.className = 'intro-stage';
-        els.introLegend.className = 'intro-legend';
+        els.introLegend.className = 'intro-legend phone-enter';
         els.practiceBoard.className = 'practice-board';
         els.introSpeech.className = 'speech-bubble';
-        els.introSpeech.textContent = '';
+        els.introSpeechText.textContent = '';
+        els.introClick.className = 'intro-click';
         els.introImpact.className = 'intro-impact';
         els.introFinale.className = 'intro-finale';
-
-        queueIntro(250, () => els.introStage.classList.add('intro-phone-active'));
-        queueIntro(1050, () => setIntroSpeech('Ugh, my dad is the worst.'));
-        queueIntro(2850, () => setIntroSpeech('He won\'t let me do anything until I beat up my siblings… <span class="math-punchline">with MATH.</span>'));
-        queueIntro(5850, () => setIntroSpeech('See ya!'));
-        queueIntro(6650, () => {
-          els.introSpeech.classList.remove('show');
-          els.introStage.classList.remove('intro-phone-active');
-        });
-        queueIntro(7150, () => {
-          els.introStage.classList.add('intro-warmup');
-          els.introLegend.classList.add('warming-up');
-          restartIntroClass(els.introLegend, 'kick-one');
-        });
-        queueIntro(7550, () => {
-          restartIntroClass(els.introImpact, 'pop');
-          els.practiceBoard.classList.add('broken');
-          playTone('attack');
-        });
-        queueIntro(8250, () => els.introLegend.classList.remove('kick-one'));
-        queueIntro(8500, () => {
-          restartIntroClass(els.introLegend, 'kick-two');
-          restartIntroClass(els.introImpact, 'pop');
-          playTone('attack');
-        });
-        queueIntro(9550, () => els.introFinale.classList.add('show'));
-        queueIntro(10550, finishIntro);
+        introLineIndex = -1;
+        queueIntro(1500, beginIntroDialogue);
       }
 
       function finishIntro() {
@@ -1756,6 +1754,7 @@
       els.finishButton.addEventListener('click', finishSession);
       els.rewardContinue.addEventListener('click', continueAfterReward);
       els.introSkip.addEventListener('click', finishIntro);
+      els.introSpeech.addEventListener('click', advanceIntroDialogue);
       els.replayIntro.addEventListener('click', playIntro);
       els.startSound.addEventListener('click', toggleSound);
       els.gameSound.addEventListener('click', toggleSound);

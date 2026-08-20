@@ -6,15 +6,21 @@ This work exists only on the `codex/opening-sequence` branch. GitHub Pages conti
 
 ## Sequence
 
-1. A pink tin can rattles and Legend answers the connected purple can.
-2. The speech bubble delivers three short beats:
-   - “Ugh, my dad is the worst.”
-   - “He won't let me do anything until I beat up my siblings… with MATH.”
+1. Legend enters already talking on a chunky pink-and-purple retro corded phone, inspired loosely by the playful shape and colors of a Tin Can kids' phone but drawn as an original prop with no branding.
+2. The conversation is split into four readable beats:
+   - “Ugh. My dad is the WORST.”
+   - “I can't do ANYTHING until I beat up my siblings…”
+   - “…with MATH.”
    - “See ya!”
-3. Legend hangs up, switches into her kick pose, and performs two warm-up moves against a breakable practice board.
-4. “LET'S DO THIS!” fills the screen before the normal opponent-selection menu appears.
+3. Each line waits for a tap. A generous 5–9 second automatic fallback keeps the scene moving if the player does not tap.
+4. Legend hangs up with a visible “CLICK!”, switches into her kick pose, and performs two warm-up moves against a breakable practice board.
+5. “LET'S DO THIS!” fills the screen before the normal opponent-selection menu appears.
 
-The complete sequence lasts about 10.5 seconds. It automatically plays only for a player who has not seen it before. The start screen includes **Replay Intro**, and the intro always includes **Skip Intro**.
+The phone pose has only a slow, slight sway while the player reads. The player may always use **Skip Intro**, and the start screen includes **Replay Intro**. The opening automatically plays only for a player who has not seen it before.
+
+## Design review
+
+Fable recommended replacing a fixed rapid timeline with tap-to-continue dialogue and isolating “…with MATH.” as its own comic beat. The implemented version follows that recommendation while preserving automatic fallbacks for a hands-off first viewing.
 
 ## Review questions
 
